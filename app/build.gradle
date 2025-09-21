@@ -40,7 +40,12 @@ dependencies {
     implementation libs.activity
     implementation libs.constraintlayout
     implementation 'com.amap.api:3dmap-location-search:latest.integration'
+    implementation 'androidx.viewpager2:viewpager2:1.0.0'
+    implementation 'com.google.android.material:material:1.4.0' // 用于TabLayout
+    implementation 'com.google.android.material:material:1.11.0' // 请使用最新版本
 
+    implementation(project(":annotation"))
+    implementation libs.recyclerview
 
 
     testImplementation libs.junit

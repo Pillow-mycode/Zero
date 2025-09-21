@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PermissionManager {
+    public static Long permissionLock;
     private PermissionManager() { }
     // 存储所有需要的权限
     private static final Map<String, Boolean> allTheRequest = new HashMap<>();
@@ -25,11 +26,11 @@ public class PermissionManager {
         MapsInitializer.updatePrivacyAgree(activity,true);
         AMapUtilCoreApi.setCollectInfoEnable(true);
 
-        boolean isAllRequestAllowed = false;
         allTheRequest.forEach((permission, isAllowed) -> {
             activity.requestPermissions(new String[]{permission}, 0);
             // 更新状态
             allTheRequest.replace(permission ,activity.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED);
         });
+
     }
 }
