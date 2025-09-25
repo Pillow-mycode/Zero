@@ -1,10 +1,11 @@
 package com.software.zero.view;
 
-import android.app.Activity;
+import android.Manifest;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -30,9 +31,6 @@ public class MainFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        // 管理权限
-        PermissionManager.handlePermission(getActivity());
-
         // 初始化控件
         initPreStart(view);
 
@@ -41,8 +39,18 @@ public class MainFragment extends Fragment {
         }
 
         // 配置控制器
-        gaoDeMapService.configMapController(mMapView);
+        if (gaoDeMapService != null) {
+            gaoDeMapService.configMapController(mMapView); // 修正方法调用
+        }
+
+        if (PermissionManager.checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
+            Toast.makeText(getContext(), "已获取定位权限", Toast.LENGTH_SHORT).show();
+            if (gaoDeMapService != null) {
+                gaoDeMapService.addBluePoint();
+            }
+        }
     }
+
 
     private void initPreStart(View view) {
         //获取地图控件引用
@@ -52,10 +60,6 @@ public class MainFragment extends Fragment {
 
     public static MainFragment newInstance() {
         return new MainFragment();
-    }
-
-    public void onLocationPermissionAccept() {
-        gaoDeMapService.addBluePoint();
     }
 
     @Override

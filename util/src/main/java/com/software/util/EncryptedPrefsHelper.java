@@ -1,0 +1,55 @@
+package com.software.util;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKey;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+
+public class EncryptedPrefsHelper {
+    private static final String PREFS_NAME = "secure_auth_prefs";
+    private final SharedPreferences encryptedSharedPreferences;
+
+    public EncryptedPrefsHelper(Context context) {
+        try {
+            // 1. 创建或获取MasterKey
+            MasterKey masterKey = new MasterKey.Builder(context)
+                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                    .build();
+
+            // 2. 初始化EncryptedSharedPreferences
+            encryptedSharedPreferences = EncryptedSharedPreferences.create(
+                    context,
+                    PREFS_NAME,
+                    masterKey,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            );
+        } catch (GeneralSecurityException | IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to initialize EncryptedSharedPreferences", e);
+        }
+    }
+
+    // 保存Token
+    public void saveAuthToken(String token) {
+        encryptedSharedPreferences.edit()
+                .putString("auth_token", token)
+                .apply(); // 异步写入，不会阻塞。也可以用 commit() 同步写入。
+    }
+
+    // 获取Token
+    public String getAuthToken() {
+        return encryptedSharedPreferences.getString("auth_token", null);
+    }
+
+    // 清除Token
+    public void clearAuthToken() {
+        encryptedSharedPreferences.edit()
+                .remove("auth_token")
+                .apply();
+    }
+}

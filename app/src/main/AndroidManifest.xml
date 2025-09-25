@@ -75,7 +75,7 @@
             android:value="3d2c173c0c83a57c68c314d76988b1d1"/>
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.software.zero.view.InterceptorActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -83,6 +83,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name="com.software.login.LoginActivity"/>
+        <activity android:name=".MainActivity"/>
+
     </application>
 
 </manifest>

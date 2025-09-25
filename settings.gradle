@@ -1,5 +1,10 @@
 pluginManagement {
     repositories {
+        // 1. 将国内镜像源放在最前面
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
+
         google {
             content {
                 includeGroupByRegex("com\\.android.*")
@@ -22,3 +27,5 @@ dependencyResolutionManagement {
 rootProject.name = "Zero"
 include ':app'
 include ':annotation'
+include ':login'
+include ':util'
