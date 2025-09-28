@@ -85,7 +85,8 @@ public class LoginPresenterImpl implements LoginContact.LoginPresenter {
             return;
         }
 
-        Observable<Response<LoginResponse>> login = loginModel.register(username, password, confirmPassword);
+        Observable<Response<LoginResponse>> login = loginModel.register(username, password, confirmPassword
+        );
         disposable = login.subscribe(r -> {
             if(r.isSuccess()) {
                 String token = r.getData().getToken();

@@ -1,4 +1,4 @@
-package com.software.zero.view;
+package com.software.zero.activity;
 
 
 import android.content.Intent;
@@ -7,7 +7,6 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.software.login.LoginActivity;
@@ -16,7 +15,7 @@ import com.software.util.dialog.LoadingDialog;
 import com.software.zero.MainActivity;
 import com.software.zero.contract.InterceptorContract;
 import com.software.zero.presenter.InterceptorPresenter;
-import com.software.zero.view.base.InterceptorBaseActivity;
+import com.software.zero.activity.base.InterceptorBaseActivity;
 
 public class InterceptorActivity extends InterceptorBaseActivity implements InterceptorContract.View {
     private EncryptedPrefsHelper eph;

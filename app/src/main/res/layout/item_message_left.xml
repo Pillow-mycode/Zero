@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp">
+
+    <!-- 头像 -->
+    <ImageView
+        android:id="@+id/avatar"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@drawable/ic_girl"
+        android:scaleType="centerCrop"
+        android:background="@drawable/avatar_circle_bg"
+        android:layout_marginEnd="6dp"/>
+
+    <!-- 气泡 -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bubble_left"
+            android:padding="12dp"
+            android:text="在干嘛呀？"
+            android:textColor="#444"
+            android:textSize="15sp"/>
+
+        <TextView
+            android:id="@+id/tvTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="14:23"
+            android:textSize="11sp"
+            android:textColor="#999"
+            android:layout_marginTop="4dp"/>
+    </LinearLayout>
+</LinearLayout>

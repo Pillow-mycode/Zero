@@ -12,11 +12,11 @@ import retrofit2.http.POST;
 public interface LoginApi {
     @POST("/login")
     @FormUrlEncoded
-    Observable<Response<LoginResponse>> login(@Field("username") String username,@Field("password") String password);
+    Observable<Response<LoginResponse>> login(@Field("phoneNumber") String username,@Field("password") String password);
 
     @POST("/register")
     @FormUrlEncoded
-    Observable<Response<LoginResponse>> register(@Field("username") String username,@Field("password") String password,
+    Observable<Response<LoginResponse>> register(@Field("phoneNumber") String username,@Field("password") String password,
                                                  @Field("confirmPassword") String confirmPassword);
 
 }

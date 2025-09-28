@@ -1,4 +1,4 @@
-package com.software.zero.view.base;
+package com.software.zero.activity.base;
 
 
 import android.os.Bundle;
@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.software.util.EncryptedPrefsHelper;
 import com.software.zero.R;
 import com.software.zero.manager.PermissionManager;
 

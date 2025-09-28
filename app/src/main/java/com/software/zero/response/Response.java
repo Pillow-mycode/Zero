@@ -5,6 +5,12 @@ public class Response<T> {
     private T data;
     private String message;
 
+    public Response(int status, T data, String message) {
+        this.status = status;
+        this.data = data;
+        this.message = message;
+    }
+
     public int getStatus() {
         return status;
     }

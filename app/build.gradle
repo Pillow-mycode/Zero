@@ -47,7 +47,11 @@ dependencies {
     // RxJava 3 核心库
     implementation 'io.reactivex.rxjava3:rxjava:3.1.8'
     implementation 'com.squareup.retrofit2:adapter-rxjava3:2.9.0'
+    
+    def room_version = "2.6.1"
 
+    implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
 
     // 如果您在 Android 项目中使用，通常还会配合 RxAndroid
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.2'
@@ -57,6 +61,7 @@ dependencies {
 
 
     implementation libs.recyclerview
+    implementation 'androidx.cardview:cardview:1.0.0'
 
 
     testImplementation libs.junit

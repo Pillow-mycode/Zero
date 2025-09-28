@@ -6,7 +6,7 @@ import com.software.zero.contract.InterceptorContract;
 import com.software.zero.model.InterceptorModel;
 import com.software.zero.response.Response;
 import com.software.zero.response.data.InterceptorData;
-import com.software.zero.view.InterceptorActivity;
+import com.software.zero.activity.InterceptorActivity;
 
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.Disposable;

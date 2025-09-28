@@ -1,4 +1,4 @@
-package com.software.zero.view;
+package com.software.zero.fragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,17 +11,16 @@ import androidx.fragment.app.Fragment;
 
 import com.software.zero.R;
 
-public class CheckRefuseFragment extends Fragment{
-    private CheckRefuseFragment() {
-    }
+public class TalkFragment extends Fragment {
+    private TalkFragment(){}
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.activity_ours_page, container, false);
+        return inflater.inflate(R.layout.activity_talk_page, container, false);
     }
 
-    public static CheckRefuseFragment newInstance() {
-        return new CheckRefuseFragment();
+    public static TalkFragment newInstance() {
+        return new TalkFragment();
     }
 }

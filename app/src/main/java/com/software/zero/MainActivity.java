@@ -2,6 +2,7 @@ package com.software.zero;
 
 
 import android.os.Bundle;
+import android.util.Log;
 
 
 import androidx.annotation.Nullable;
@@ -11,10 +12,14 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.amap.api.maps.MapView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.software.zero.view.MainFragment;
-import com.software.zero.view.OursFragment;
-import com.software.zero.view.TalkFragment;
+import com.software.zero.fragment.MainFragment;
+import com.software.zero.fragment.OursFragment;
+import com.software.zero.fragment.TalkFragment;
+import com.software.zero.pojo.User;
+import com.software.zero.repository.UserRepository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 主Activity，作为应用入口和Fragment容器
@@ -38,6 +43,9 @@ public class MainActivity extends AppCompatActivity {
     private final MainFragment mainFragment = MainFragment.newInstance();
     private final TalkFragment talkFragment = TalkFragment.newInstance();
     private final OursFragment oursFragment = OursFragment.newInstance();
+    
+    // 用户数据仓库
+    private UserRepository userRepository;
 
     /**
      * Activity创建时的生命周期方法
@@ -49,6 +57,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         // 设置内容视图为底部导航布局
         setContentView(R.layout.activity_bottom_navigation_view);
+        
+        // 初始化用户数据仓库
+        userRepository = new UserRepository(this);
 
         handleMainFragment();
 
@@ -73,8 +84,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
-
-
 
     /**
      * 处理并显示"我们的"Fragment
