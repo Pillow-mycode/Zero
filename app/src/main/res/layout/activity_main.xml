@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
          />
 
-    <com.software.zero.view.MyScrollView
+    <com.software.zero.ui.view.MyScrollView
         android:id="@+id/home_bottom_choice"
         android:layout_width="match_parent"
         android:layout_height="200dp"
@@ -258,5 +258,5 @@
                 </androidx.cardview.widget.CardView>
             </GridLayout>
         </LinearLayout>
-    </com.software.zero.view.MyScrollView>
+    </com.software.zero.ui.view.MyScrollView>
 </FrameLayout>

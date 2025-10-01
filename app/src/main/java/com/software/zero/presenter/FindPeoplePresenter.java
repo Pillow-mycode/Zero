@@ -1,7 +1,7 @@
 package com.software.zero.presenter;
 
 
-import com.software.zero.activity.FindPeopleActivity;
+import com.software.zero.ui.activity.FindPeopleActivity;
 import com.software.zero.contract.FindPeopleContract;
 import com.software.zero.model.FindPeopleModel;
 import com.software.zero.response.Response;

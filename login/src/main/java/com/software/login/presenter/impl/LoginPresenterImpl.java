@@ -1,5 +1,7 @@
 package com.software.login.presenter.impl;
 
+import android.util.Log;
+
 import com.software.login.model.LoginModel;
 import com.software.login.model.impl.LoginModelImpl;
 import com.software.login.presenter.LoginContact;
@@ -10,6 +12,7 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.Disposable;
 
 public class LoginPresenterImpl implements LoginContact.LoginPresenter {
+    private static final String TAG = "Login";
     private LoginContact.LoginView view;
     private LoginModel loginModel;
     private Disposable disposable;
@@ -41,6 +44,7 @@ public class LoginPresenterImpl implements LoginContact.LoginPresenter {
         Observable<Response<LoginResponse>> login = loginModel.login(username, password);
         disposable = login.subscribe(r -> {
             if(r.isSuccess()) {
+                Log.d(TAG, "login: " + r);
                 String token = r.getData().getToken();
                 view.onSuccess(token);
                 dispatch();

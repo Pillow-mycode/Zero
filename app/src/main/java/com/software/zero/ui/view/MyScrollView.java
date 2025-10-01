@@ -1,4 +1,4 @@
-package com.software.zero.view;
+package com.software.zero.ui.view;
 
 import android.animation.ValueAnimator;
 import android.content.Context;

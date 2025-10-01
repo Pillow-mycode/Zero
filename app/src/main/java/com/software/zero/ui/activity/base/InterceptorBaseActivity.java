@@ -1,4 +1,4 @@
-package com.software.zero.activity.base;
+package com.software.zero.ui.activity.base;
 
 
 import android.os.Bundle;

@@ -1,5 +1,6 @@
-package com.software.util;
+package com.software.util.share_preference;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 
@@ -12,8 +13,27 @@ import java.security.GeneralSecurityException;
 public class EncryptedPrefsHelper {
     private static final String PREFS_NAME = "secure_auth_prefs";
     private final SharedPreferences encryptedSharedPreferences;
+    private static volatile EncryptedPrefsHelper instance;
+    public static void init(Application context) {
+        if(instance == null) {
+            synchronized (EncryptedPrefsHelper.class) {
+                if(instance == null) {
+                    instance = new EncryptedPrefsHelper(context);
+                }
+            }
+        }
+    }
 
-    public EncryptedPrefsHelper(Context context) {
+    public static EncryptedPrefsHelper getInstance() {
+        return instance;
+    }
+
+    public String getString(String key) {
+        return encryptedSharedPreferences.getString(key, null);
+    }
+
+
+    private EncryptedPrefsHelper(Application context) {
         try {
             // 1. 创建或获取MasterKey
             MasterKey masterKey = new MasterKey.Builder(context)

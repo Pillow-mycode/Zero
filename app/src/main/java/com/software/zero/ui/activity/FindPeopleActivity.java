@@ -1,4 +1,4 @@
-package com.software.zero.activity;
+package com.software.zero.ui.activity;
 
 import android.os.Bundle;
 import android.widget.Button;
@@ -7,7 +7,6 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 

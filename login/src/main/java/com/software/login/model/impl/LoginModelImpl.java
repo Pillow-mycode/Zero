@@ -13,7 +13,7 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class LoginModelImpl implements LoginModel {
-    private final MyRetrofit myRetrofit = MyRetrofit.getInstance(ServicerBaseUrl.getURL());
+    private final MyRetrofit myRetrofit = MyRetrofit.getInstance();
 
     @Override
     public Observable<Response<LoginResponse>> login(String username, String password) {

@@ -13,7 +13,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 public class InterceptorModel {
 
     public Observable<Response<InterceptorData>> checkTokenEffect(String authToken) {
-        MyRetrofit retrofit = MyRetrofit.getInstance(ServicerConfig.getURL());
+        MyRetrofit retrofit = MyRetrofit.getInstance();
         InterceptorApi api = retrofit.create(InterceptorApi.class);
         return api.checkTokenEffect(authToken).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());

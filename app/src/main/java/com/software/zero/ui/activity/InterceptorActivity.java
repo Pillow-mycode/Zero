@@ -1,4 +1,4 @@
-package com.software.zero.activity;
+package com.software.zero.ui.activity;
 
 
 import android.content.Intent;
@@ -10,12 +10,11 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 
 import com.software.login.LoginActivity;
-import com.software.util.EncryptedPrefsHelper;
+import com.software.util.share_preference.EncryptedPrefsHelper;
 import com.software.util.dialog.LoadingDialog;
-import com.software.zero.MainActivity;
 import com.software.zero.contract.InterceptorContract;
 import com.software.zero.presenter.InterceptorPresenter;
-import com.software.zero.activity.base.InterceptorBaseActivity;
+import com.software.zero.ui.activity.base.InterceptorBaseActivity;
 
 public class InterceptorActivity extends InterceptorBaseActivity implements InterceptorContract.View {
     private EncryptedPrefsHelper eph;
@@ -27,7 +26,7 @@ public class InterceptorActivity extends InterceptorBaseActivity implements Inte
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         presenter = new InterceptorPresenter(this);
-        eph = new EncryptedPrefsHelper(this);
+        eph = EncryptedPrefsHelper.getInstance();
         loadingDialog = new LoadingDialog(this);
         
         // 在 onCreate 中注册 ActivityResultLauncher

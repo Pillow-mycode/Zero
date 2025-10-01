@@ -1,8 +1,7 @@
-package com.software.zero;
+package com.software.zero.ui.activity;
 
 
 import android.os.Bundle;
-import android.util.Log;
 
 
 import androidx.annotation.Nullable;
@@ -12,14 +11,11 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.amap.api.maps.MapView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.software.zero.fragment.MainFragment;
-import com.software.zero.fragment.OursFragment;
-import com.software.zero.fragment.TalkFragment;
-import com.software.zero.pojo.User;
+import com.software.zero.R;
+import com.software.zero.ui.fragment.MainFragment;
+import com.software.zero.ui.fragment.OursFragment;
+import com.software.zero.ui.fragment.TalkFragment;
 import com.software.zero.repository.UserRepository;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * 主Activity，作为应用入口和Fragment容器

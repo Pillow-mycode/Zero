@@ -1,4 +1,4 @@
-package com.software.zero.fragment;
+package com.software.zero.ui.fragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,8 +11,8 @@ import androidx.fragment.app.Fragment;
 
 import com.software.zero.R;
 
-public class OursFragment extends Fragment {
-    private OursFragment() {
+public class CheckRefuseFragment extends Fragment{
+    private CheckRefuseFragment() {
     }
 
     @Nullable
@@ -21,7 +21,7 @@ public class OursFragment extends Fragment {
         return inflater.inflate(R.layout.activity_ours_page, container, false);
     }
 
-    public static OursFragment newInstance() {
-        return new OursFragment();
+    public static CheckRefuseFragment newInstance() {
+        return new CheckRefuseFragment();
     }
 }

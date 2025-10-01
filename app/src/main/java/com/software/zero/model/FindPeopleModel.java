@@ -13,7 +13,7 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class FindPeopleModel implements FindPeopleContract {
-    private final MyRetrofit retrofit = MyRetrofit.getInstance(ServicerConfig.getURL());
+    private final MyRetrofit retrofit = MyRetrofit.getInstance();
     public Observable<Response<FindPeopleData>> findPeople(String etText) {
         FindPeopleApi api = retrofit.create(FindPeopleApi.class);
         return api.findPeopleList(etText)

@@ -1,4 +1,4 @@
-package com.software.zero.fragment;
+package com.software.zero.ui.fragment;
 
 import android.Manifest;
 import android.os.Bundle;

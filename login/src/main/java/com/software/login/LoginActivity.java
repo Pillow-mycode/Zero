@@ -214,6 +214,7 @@ public class LoginActivity extends AppCompatActivity implements LoginContact.Log
 
     @Override
     public void onError(String message) {
+        Log.d(TAG, "onError: " + message);
         Toast.makeText(this, "网络请求错误，请检查网络连接", Toast.LENGTH_SHORT).show();
         loadingDialog.dismiss();
     }
