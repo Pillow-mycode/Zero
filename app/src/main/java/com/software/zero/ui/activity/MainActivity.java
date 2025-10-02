@@ -4,6 +4,7 @@ package com.software.zero.ui.activity;
 import android.os.Bundle;
 
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -11,11 +12,17 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.amap.api.maps.MapView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.software.util.share_preference.EncryptedPrefsHelper;
+import com.software.util.websocket.WebSocketManager;
+import com.software.zero.MyApp;
 import com.software.zero.R;
 import com.software.zero.ui.fragment.MainFragment;
 import com.software.zero.ui.fragment.OursFragment;
 import com.software.zero.ui.fragment.TalkFragment;
 import com.software.zero.repository.UserRepository;
+
+import okhttp3.WebSocket;
+import okio.ByteString;
 
 /**
  * 主Activity，作为应用入口和Fragment容器
@@ -39,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private final MainFragment mainFragment = MainFragment.newInstance();
     private final TalkFragment talkFragment = TalkFragment.newInstance();
     private final OursFragment oursFragment = OursFragment.newInstance();
+    private EncryptedPrefsHelper encryptedPrefsHelper;
     
     // 用户数据仓库
     private UserRepository userRepository;
@@ -51,6 +59,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        encryptedPrefsHelper = EncryptedPrefsHelper.getInstance();
+        WebSocketManager webSocketManager = new WebSocketManager("ws://"+ MyApp.url +"/ws");
+        webSocketManager.connect(encryptedPrefsHelper.getAuthToken(), webSocketManager.new MyListener() {
+            @Override
+            public void onMessage(@NonNull WebSocket webSocket, @NonNull ByteString bytes) {
+                super.onMessage(webSocket, bytes);
+            }
+        });
         // 设置内容视图为底部导航布局
         setContentView(R.layout.activity_bottom_navigation_view);
         

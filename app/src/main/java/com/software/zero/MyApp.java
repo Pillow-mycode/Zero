@@ -14,6 +14,7 @@ import okhttp3.Response;
 
 public class MyApp extends Application {
     private static MyApp instance;
+    public static String url = "10.0.2.2:8080";
 
     @Override
     public void onCreate() {
@@ -21,7 +22,7 @@ public class MyApp extends Application {
         instance = this;
         EncryptedPrefsHelper.init(this);
         MyRetrofit.init(new MyRetrofit.Builder()
-                .setBaseUrl("http://10.0.2.2:8080")
+                .setBaseUrl("http://" + url)
                 .addInterceptor(new TokenInterceptor())
         );
     }
