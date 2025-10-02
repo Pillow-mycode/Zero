@@ -3,7 +3,6 @@ package com.software.zero.model;
 
 import com.software.util.retrofit.MyRetrofit;
 import com.software.zero.api.FindPeopleApi;
-import com.software.zero.config.ServicerConfig;
 import com.software.zero.contract.FindPeopleContract;
 import com.software.zero.response.Response;
 import com.software.zero.response.data.FindPeopleData;
@@ -19,5 +18,13 @@ public class FindPeopleModel implements FindPeopleContract {
         return api.findPeopleList(etText)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<Response<Boolean>> addUser(String phoneNumber) {
+        FindPeopleApi api = retrofit.create(FindPeopleApi.class);
+        return api.addPeople(phoneNumber)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+
     }
 }

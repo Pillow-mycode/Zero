@@ -50,7 +50,13 @@ public class InterceptorActivity extends InterceptorBaseActivity implements Inte
                 }
         );
     }
-    
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        loadingDialog.dismiss();
+    }
+
     @Override
     protected void onIntercept() {
         String authToken = eph.getAuthToken();

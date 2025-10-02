@@ -12,7 +12,7 @@ import androidx.fragment.app.Fragment;
 import com.software.zero.R;
 
 public class TalkFragment extends Fragment {
-    private TalkFragment(){}
+    public TalkFragment(){}
 
     @Nullable
     @Override

@@ -33,6 +33,7 @@ public class EncryptedPrefsHelper {
     }
 
 
+
     private EncryptedPrefsHelper(Application context) {
         try {
             // 1. 创建或获取MasterKey
@@ -59,6 +60,16 @@ public class EncryptedPrefsHelper {
         encryptedSharedPreferences.edit()
                 .putString("auth_token", token)
                 .apply(); // 异步写入，不会阻塞。也可以用 commit() 同步写入。
+    }
+
+    public void saveBoolean(String key, Boolean b) {
+        encryptedSharedPreferences.edit()
+                .putBoolean(key, b)
+                .apply();;
+    }
+
+    public Boolean getBoolean(String key) {
+        return encryptedSharedPreferences.getBoolean(key, false);
     }
 
     // 获取Token

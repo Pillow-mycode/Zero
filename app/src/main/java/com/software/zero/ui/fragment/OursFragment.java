@@ -18,7 +18,7 @@ import com.software.zero.enums.UserProperty;
 import com.software.zero.ui.activity.FindPeopleActivity;
 
 public class OursFragment extends Fragment {
-    private OursFragment() {
+    public OursFragment() {
     }
     private ShapeableImageView leftImage, rightImage;
     private EncryptedPrefsHelper sharePreference;

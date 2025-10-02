@@ -20,7 +20,7 @@ public class MainFragment extends Fragment {
     private MapView mMapView;
     private GaoDeMapService gaoDeMapService;
 
-    private MainFragment() {}
+    public MainFragment() {}
 
     @Nullable
     @Override

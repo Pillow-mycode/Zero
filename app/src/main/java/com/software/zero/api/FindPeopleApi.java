@@ -13,4 +13,8 @@ public interface FindPeopleApi {
     @POST("/find-people")
     @FormUrlEncoded
     Observable<Response<FindPeopleData>> findPeopleList(@Field("userNameOrPhoneNumber") String text);
+
+    @POST("/add-people")
+    @FormUrlEncoded
+    Observable<Response<Boolean>> addPeople(@Field("phoneNumber")String phoneNumber);
 }

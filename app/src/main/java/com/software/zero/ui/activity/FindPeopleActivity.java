@@ -1,5 +1,8 @@
 package com.software.zero.ui.activity;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,7 +29,6 @@ public class FindPeopleActivity extends AppCompatActivity implements FindPeopleC
     private RecyclerView rv_people;
     private FindPeopleContract.Presenter presenter;
     private FindPeopleAdapter findPeopleAdapter;
-
     private LoadingDialog loading;
 
     @Override
@@ -49,6 +51,10 @@ public class FindPeopleActivity extends AppCompatActivity implements FindPeopleC
         presenter = new FindPeoplePresenter(this);
         rv_people.setLayoutManager(new LinearLayoutManager(this));
         findPeopleAdapter = new FindPeopleAdapter();
+        findPeopleAdapter.setOnAddUserListener((phoneNumber, holder) ->  {
+            loading.show();
+            presenter.addUser(phoneNumber, holder);
+        });
         rv_people.setAdapter(findPeopleAdapter);
     }
 
@@ -56,12 +62,20 @@ public class FindPeopleActivity extends AppCompatActivity implements FindPeopleC
     public void onFindSuccess(List<FindPeopleData.SearchMessage> list) {
         loading.dismiss();
         findPeopleAdapter.updateAdapter(list); // 更新adapter
+        Toast.makeText(this, "搜索成功", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onError(Throwable e) {
         loading.dismiss();
         Toast.makeText(this, "网络请求错误，请检查网络连接", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onAddSuccess(FindPeopleAdapter.ViewHolder viewHolder) {
+        loading.dismiss();
+        viewHolder.button.setVisibility(GONE);
+        viewHolder.requested.setVisibility(VISIBLE);
     }
 
     @Override
