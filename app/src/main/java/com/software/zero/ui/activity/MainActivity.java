@@ -1,26 +1,41 @@
 package com.software.zero.ui.activity;
 
 
+import android.graphics.Color;
 import android.os.Bundle;
 
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.amap.api.maps.MapView;
+import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.software.util.GsonUtil;
 import com.software.util.share_preference.EncryptedPrefsHelper;
-import com.software.util.websocket.WebSocketManager;
+import com.software.util.share_preference.TokenPrefsHelper;
+import com.software.util.websocket.WebSocketHelper;
 import com.software.zero.MyApp;
 import com.software.zero.R;
+import com.software.zero.enums.WebSocketType;
+import com.software.zero.pojo.AddFriendMessage;
+import com.software.zero.pojo.WebSocketMessageEvent;
+import com.software.zero.repository.AddFriendRepository;
 import com.software.zero.ui.fragment.MainFragment;
 import com.software.zero.ui.fragment.OursFragment;
 import com.software.zero.ui.fragment.TalkFragment;
-import com.software.zero.repository.UserRepository;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Objects;
+
+import okhttp3.Response;
 import okhttp3.WebSocket;
 import okio.ByteString;
 
@@ -47,9 +62,15 @@ public class MainActivity extends AppCompatActivity {
     private final TalkFragment talkFragment = TalkFragment.newInstance();
     private final OursFragment oursFragment = OursFragment.newInstance();
     private EncryptedPrefsHelper encryptedPrefsHelper;
-    
-    // 用户数据仓库
-    private UserRepository userRepository;
+    private TokenPrefsHelper tokenPrefsHelper;
+    private WebSocketHelper webSocketHelper;
+    private BottomNavigationView navigationView;
+    private int messageCount = 0;
+    private BadgeDrawable navigation_message;
+    private BadgeDrawable navigation_add_friend;
+    private boolean badgeStatus = false;
+    private static AddFriendRepository addFriendRepository;
+
 
     /**
      * Activity创建时的生命周期方法
@@ -59,25 +80,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        encryptedPrefsHelper = EncryptedPrefsHelper.getInstance();
-        WebSocketManager webSocketManager = new WebSocketManager("ws://"+ MyApp.url +"/ws");
-        webSocketManager.connect(encryptedPrefsHelper.getAuthToken(), webSocketManager.new MyListener() {
-            @Override
-            public void onMessage(@NonNull WebSocket webSocket, @NonNull ByteString bytes) {
-                super.onMessage(webSocket, bytes);
-            }
-        });
+        init();
         // 设置内容视图为底部导航布局
         setContentView(R.layout.activity_bottom_navigation_view);
-        
-        // 初始化用户数据仓库
-        userRepository = new UserRepository(this);
 
         handleMainFragment();
-
-
         // 初始化底部导航栏并设置项目选择监听器
-        BottomNavigationView navigationView = findViewById(R.id.bottom_navigation);
+        navigationView = findViewById(R.id.bottom_navigation);
+        navigation_add_friend = navigationView.getOrCreateBadge(R.id.navigation_ours);
+        navigation_add_friend.setBackgroundColor(Color.RED);
+
+
         navigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
             // 根据点击的导航项切换不同的Fragment
@@ -85,6 +98,8 @@ public class MainActivity extends AppCompatActivity {
                 handleMainFragment();
                 return true;
             } else if (itemId == R.id.navigation_message) {
+                messageCount = 0;
+                updateBadges();
                 handleTalkFragment();
                 return true;
             } else if (itemId == R.id.navigation_ours) {
@@ -94,13 +109,70 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
 
-
+        setupBadges(); // 设立角标
     }
 
-    /**
-     * 处理并显示"我们的"Fragment
-     * 使用add()和hide()而非replace()来保持Fragment状态
-     */
+    public void init() {
+        EventBus.getDefault().register(this);
+        tokenPrefsHelper = TokenPrefsHelper.getInstance();
+        EncryptedPrefsHelper.init(MyApp.getInstance(), tokenPrefsHelper.getString("now-user"));
+        encryptedPrefsHelper = EncryptedPrefsHelper.getInstance();
+        webSocketHelper = new WebSocketHelper("ws://" + MyApp.url + "/ws");
+        webSocketHelper.connect(TokenPrefsHelper.getInstance().getAuthToken(), new WebSocketEventListenerImpl());
+        addFriendRepository = new AddFriendRepository();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(addFriendRepository.checkNewMessage()) {
+            navigation_add_friend.setVisible(true);
+        } else {
+            navigation_add_friend.setVisible(false);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void countMessage(WebSocketMessageEvent event) {
+        if(Objects.equals(event.getMessageType(), WebSocketType.CHAT_MESSAGE.getType())) {
+            messageCount++;
+            updateBadges();
+        }
+    }
+
+    private void updateBadges() {
+        if(messageCount > 0) {
+            navigation_message.setNumber(messageCount);
+            if(!badgeStatus){
+                navigation_message.setVisible(true);
+                badgeStatus = true;
+            }
+        }
+        else {
+            navigation_message.setVisible(false);
+            badgeStatus = false;
+        }
+    }
+
+    private void setupBadges() {
+        navigation_message = navigationView.getOrCreateBadge(R.id.navigation_message);
+        navigation_message.setBackgroundColor(Color.RED);
+        navigation_message.setBadgeTextColor(Color.WHITE);
+        navigation_message.setNumber(messageCount); // 设置角标数字，超过99会显示99+
+        navigation_message.setMaxCharacterCount(3); // 设置最大字符数
+        navigation_message.setVisible(false);
+    }
+
+        /**
+         * 处理并显示"我们的"Fragment
+         * 使用add()和hide()而非replace()来保持Fragment状态
+         */
     private void handleOursFragment() {
         // 获取FragmentManager并开始事务
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
@@ -155,5 +227,57 @@ public class MainActivity extends AppCompatActivity {
         }
         currentFragment = mainFragment;
         fragmentTransaction.commit();
+    }
+
+    public static class WebSocketEventListenerImpl implements WebSocketHelper.WebSocketEventListener {
+        @Override
+        public void onOpen(WebSocket webSocket, Response response) {
+
+        }
+        @Override
+        public void onMessage(WebSocket webSocket, String text) {
+            // 解析消息，获取类型
+            try {
+                JSONObject jsonMessage = new JSONObject(text);
+                String messageType = jsonMessage.getString("type");
+                String payload = jsonMessage.getString("payload");  // 修复：使用getString而不是getJSONObject
+
+                if(messageType.equals(WebSocketType.ADD_FRIEND.getType())) {
+                    AddFriendMessage addFriendMessage = GsonUtil.fromJson(payload, AddFriendMessage.class);
+                    addFriendMessage.setIsNew(1);
+                    addFriendMessage.setHasRefuse(0);
+                    addFriendRepository.insertMessage(addFriendMessage);
+                }
+                else {
+                    // 创建一个通用事件，包含类型和数据
+                    WebSocketMessageEvent event = new WebSocketMessageEvent(messageType, payload);
+                    EventBus.getDefault().post(event);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        @Override
+        public void onMessage(WebSocket webSocket, ByteString bytes) {
+
+        }
+
+        @Override
+        public void onClosing(WebSocket webSocket, int code, String reason) {
+
+        }
+
+        @Override
+        public void onClosed(WebSocket webSocket, int code, String reason) {
+
+        }
+
+        @Override
+        public void onFailure(WebSocket webSocket, Throwable t, Response response) {
+
+        }
+
     }
 }

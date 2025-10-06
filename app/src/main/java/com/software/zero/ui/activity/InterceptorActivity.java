@@ -12,12 +12,13 @@ import androidx.annotation.Nullable;
 import com.software.login.LoginActivity;
 import com.software.util.share_preference.EncryptedPrefsHelper;
 import com.software.util.dialog.LoadingDialog;
+import com.software.util.share_preference.TokenPrefsHelper;
 import com.software.zero.contract.InterceptorContract;
 import com.software.zero.presenter.InterceptorPresenter;
 import com.software.zero.ui.activity.base.InterceptorBaseActivity;
 
 public class InterceptorActivity extends InterceptorBaseActivity implements InterceptorContract.View {
-    private EncryptedPrefsHelper eph;
+    private TokenPrefsHelper tokenPrefsHelper;
     private ActivityResultLauncher<Intent> startActivityLauncher;
     private InterceptorContract.Presenter presenter;
     private LoadingDialog loadingDialog;
@@ -26,7 +27,7 @@ public class InterceptorActivity extends InterceptorBaseActivity implements Inte
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         presenter = new InterceptorPresenter(this);
-        eph = EncryptedPrefsHelper.getInstance();
+        tokenPrefsHelper = TokenPrefsHelper.getInstance();
         loadingDialog = new LoadingDialog(this);
         
         // 在 onCreate 中注册 ActivityResultLauncher
@@ -39,7 +40,7 @@ public class InterceptorActivity extends InterceptorBaseActivity implements Inte
                             String token = data.getStringExtra("token_key");
                             if (token != null && !token.isEmpty()) {
                                 // 保存token
-                                eph.saveAuthToken(token);
+                                tokenPrefsHelper.saveAuthToken(token);
                             }
                             startActivity(new Intent(InterceptorActivity.this, MainActivity.class));
                             finish();
@@ -59,7 +60,7 @@ public class InterceptorActivity extends InterceptorBaseActivity implements Inte
 
     @Override
     protected void onIntercept() {
-        String authToken = eph.getAuthToken();
+        String authToken = tokenPrefsHelper.getAuthToken();
         if(authToken == null || authToken.isEmpty()) {
             // 启动登录界面
             Intent intent = new Intent(this, LoginActivity.class);

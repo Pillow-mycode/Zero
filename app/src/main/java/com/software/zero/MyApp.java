@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 
 import com.software.util.retrofit.MyRetrofit;
 import com.software.util.share_preference.EncryptedPrefsHelper;
+import com.software.util.share_preference.TokenPrefsHelper;
 
 import java.io.IOException;
 
@@ -15,12 +16,14 @@ import okhttp3.Response;
 public class MyApp extends Application {
     private static MyApp instance;
     public static String url = "10.0.2.2:8080";
+    private static TokenPrefsHelper tokenPrefsHelper;
 
     @Override
     public void onCreate() {
         super.onCreate();
         instance = this;
-        EncryptedPrefsHelper.init(this);
+        TokenPrefsHelper.init(this);
+        tokenPrefsHelper = TokenPrefsHelper.getInstance();
         MyRetrofit.init(new MyRetrofit.Builder()
                 .setBaseUrl("http://" + url)
                 .addInterceptor(new TokenInterceptor())
@@ -39,7 +42,7 @@ public class MyApp extends Application {
             okhttp3.Request originalRequest = chain.request();
 
             // 从加密存储中获取token
-            String token = EncryptedPrefsHelper.getInstance().getAuthToken();
+            String token = tokenPrefsHelper.getAuthToken();
 
             // 如果token存在，添加到请求头中
             if (token != null && !token.isEmpty()) {

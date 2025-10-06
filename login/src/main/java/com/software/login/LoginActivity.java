@@ -21,6 +21,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.software.login.presenter.LoginContact;
 import com.software.login.presenter.impl.LoginPresenterImpl;
 import com.software.util.dialog.LoadingDialog;
+import com.software.util.share_preference.EncryptedPrefsHelper;
+import com.software.util.share_preference.TokenPrefsHelper;
 
 public class LoginActivity extends AppCompatActivity implements LoginContact.LoginView{
     private static final String TAG = "LoginActivity";
@@ -200,6 +202,7 @@ public class LoginActivity extends AppCompatActivity implements LoginContact.Log
     public void onSuccess(String token) {
         Intent intent = new Intent();
         intent.putExtra("token_key", token);
+        TokenPrefsHelper.getInstance().saveString("now-user", etLoginUsername.getText().toString());
         setResult(RESULT_OK, intent);
         loadingDialog.dismiss();
         Toast.makeText(this, "登录成功", Toast.LENGTH_SHORT).show();
@@ -233,6 +236,7 @@ public class LoginActivity extends AppCompatActivity implements LoginContact.Log
     public void onRegisteSuccess(String token) {
         Intent intent = new Intent();
         intent.putExtra("token_key", token);
+        TokenPrefsHelper.getInstance().saveString("now-user", etRegisterUsername.getText().toString());
         setResult(RESULT_OK, intent);
         loadingDialog.dismiss();
         Toast.makeText(this, "注册成功", Toast.LENGTH_SHORT).show();

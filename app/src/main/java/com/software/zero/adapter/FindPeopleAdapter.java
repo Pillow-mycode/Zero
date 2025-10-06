@@ -87,8 +87,8 @@ public class FindPeopleAdapter extends RecyclerView.Adapter<FindPeopleAdapter.Vi
             listener.addUser(list.get(position).getPhone_number(), holder);
         });
         if(encryptedPrefsHelper.getBoolean(searchMessage.getPhone_number())) {
-            holder.button.setVisibility(GONE);
-            holder.requested.setVisibility(VISIBLE);
+            //holder.button.setVisibility(GONE); todo
+            //holder.requested.setVisibility(VISIBLE);
         }
     }
 

@@ -3,9 +3,11 @@ package com.software.zero.ui.activity;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -18,6 +20,7 @@ import com.software.zero.R;
 import com.software.zero.adapter.FindPeopleAdapter;
 import com.software.zero.contract.FindPeopleContract;
 import com.software.zero.presenter.FindPeoplePresenter;
+import com.software.zero.repository.AddFriendRepository;
 import com.software.zero.response.data.FindPeopleData;
 
 import java.util.List;
@@ -29,7 +32,21 @@ public class FindPeopleActivity extends AppCompatActivity implements FindPeopleC
     private RecyclerView rv_people;
     private FindPeopleContract.Presenter presenter;
     private FindPeopleAdapter findPeopleAdapter;
+    private Button bt_friend_requests;
     private LoadingDialog loading;
+    private TextView tv_badge;
+    private AddFriendRepository addFriendRepository = new AddFriendRepository();
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(addFriendRepository.checkNewMessage()) {
+            tv_badge.setVisibility(VISIBLE);
+        } else {
+            tv_badge.setVisibility(GONE);
+        }
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -45,9 +62,11 @@ public class FindPeopleActivity extends AppCompatActivity implements FindPeopleC
 
     private void init() { // 初始化控件，包括recyclerview及其Adapter
         loading = new LoadingDialog(this);
+        tv_badge = findViewById(R.id.tv_badge);
         et_find_people = findViewById(R.id.et_search);
         bt_search = findViewById(R.id.btn_search);
         rv_people = findViewById(R.id.rv_search_results);
+        bt_friend_requests = findViewById(R.id.btn_friend_requests);
         presenter = new FindPeoplePresenter(this);
         rv_people.setLayoutManager(new LinearLayoutManager(this));
         findPeopleAdapter = new FindPeopleAdapter();
@@ -56,6 +75,11 @@ public class FindPeopleActivity extends AppCompatActivity implements FindPeopleC
             presenter.addUser(phoneNumber, holder);
         });
         rv_people.setAdapter(findPeopleAdapter);
+        bt_friend_requests.setOnClickListener(v -> {
+            startActivity(new Intent(this, FriendRequestActivity.class));
+            tv_badge.setVisibility(GONE);
+
+        });
     }
 
     @Override
@@ -74,8 +98,8 @@ public class FindPeopleActivity extends AppCompatActivity implements FindPeopleC
     @Override
     public void onAddSuccess(FindPeopleAdapter.ViewHolder viewHolder) {
         loading.dismiss();
-        viewHolder.button.setVisibility(GONE);
-        viewHolder.requested.setVisibility(VISIBLE);
+        //viewHolder.button.setVisibility(GONE);todo
+        //viewHolder.requested.setVisibility(VISIBLE);
     }
 
     @Override

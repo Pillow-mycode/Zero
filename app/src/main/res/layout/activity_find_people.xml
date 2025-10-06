@@ -27,7 +27,38 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="搜索" />
+            android:text="搜索"
+            android:backgroundTint="#2196F3"
+            android:textColor="@android:color/white" />
+
+        <!-- 添加带角标的申请列表按钮 -->
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp">
+
+            <Button
+                android:id="@+id/btn_friend_requests"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="申请列表"
+                android:backgroundTint="#2196F3"
+                android:textColor="@android:color/white" />
+
+            <!-- 角标 -->
+            <TextView
+                android:id="@+id/tv_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|end"
+                android:background="@drawable/badge_background"
+                android:textColor="@android:color/white"
+                android:textSize="7sp"
+                android:gravity="center"
+                android:visibility="visible"
+                android:minWidth="13dp"
+                android:minHeight="12dp" />
+        </FrameLayout>
 
     </LinearLayout>
 
