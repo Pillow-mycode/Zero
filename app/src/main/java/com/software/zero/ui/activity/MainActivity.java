@@ -3,6 +3,8 @@ package com.software.zero.ui.activity;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
 
 
 import androidx.annotation.Nullable;
@@ -14,15 +16,22 @@ import com.amap.api.maps.MapView;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.software.util.GsonUtil;
+import com.software.util.dialog.LoadingDialog;
 import com.software.util.share_preference.EncryptedPrefsHelper;
 import com.software.util.share_preference.TokenPrefsHelper;
 import com.software.util.websocket.WebSocketHelper;
 import com.software.zero.MyApp;
 import com.software.zero.R;
+import com.software.zero.enums.UserProperty;
 import com.software.zero.enums.WebSocketType;
+import com.software.zero.model.AddFriendModel;
 import com.software.zero.pojo.AddFriendMessage;
+import com.software.zero.pojo.ChatHistory;
 import com.software.zero.pojo.WebSocketMessageEvent;
 import com.software.zero.repository.AddFriendRepository;
+import com.software.zero.repository.ChatRepository;
+import com.software.zero.response.data.FriendRequestData;
+import com.software.zero.ui.fragment.CheckRefuseFragment;
 import com.software.zero.ui.fragment.MainFragment;
 import com.software.zero.ui.fragment.OursFragment;
 import com.software.zero.ui.fragment.TalkFragment;
@@ -35,6 +44,9 @@ import org.json.JSONObject;
 
 import java.util.Objects;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import okhttp3.Response;
 import okhttp3.WebSocket;
 import okio.ByteString;
@@ -61,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
     private final MainFragment mainFragment = MainFragment.newInstance();
     private final TalkFragment talkFragment = TalkFragment.newInstance();
     private final OursFragment oursFragment = OursFragment.newInstance();
+    private final CheckRefuseFragment checkRefuseFragment = CheckRefuseFragment.newInstance();
     private EncryptedPrefsHelper encryptedPrefsHelper;
     private TokenPrefsHelper tokenPrefsHelper;
     private WebSocketHelper webSocketHelper;
@@ -70,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
     private BadgeDrawable navigation_add_friend;
     private boolean badgeStatus = false;
     private static AddFriendRepository addFriendRepository;
+    private LoadingDialog dialog;
 
 
     /**
@@ -98,10 +112,17 @@ public class MainActivity extends AppCompatActivity {
                 handleMainFragment();
                 return true;
             } else if (itemId == R.id.navigation_message) {
-                messageCount = 0;
-                updateBadges();
-                handleTalkFragment();
-                return true;
+                if(encryptedPrefsHelper.getString(UserProperty.PHONE_NUMBER.getPropertyName())!=null
+                        && !encryptedPrefsHelper.getString(UserProperty.PHONE_NUMBER.getPropertyName()).isEmpty()) {
+                    messageCount = 0;
+                    updateBadges();
+                    handleTalkFragment();
+                    return true;
+                }
+                else {
+                    handleCheckRefuseFragment();
+                }
+
             } else if (itemId == R.id.navigation_ours) {
                 handleOursFragment();
                 return true;
@@ -112,6 +133,8 @@ public class MainActivity extends AppCompatActivity {
         setupBadges(); // 设立角标
     }
 
+
+    private Disposable disposable;
     public void init() {
         EventBus.getDefault().register(this);
         tokenPrefsHelper = TokenPrefsHelper.getInstance();
@@ -120,6 +143,29 @@ public class MainActivity extends AppCompatActivity {
         webSocketHelper = new WebSocketHelper("ws://" + MyApp.url + "/ws");
         webSocketHelper.connect(TokenPrefsHelper.getInstance().getAuthToken(), new WebSocketEventListenerImpl());
         addFriendRepository = new AddFriendRepository();
+        dialog = new LoadingDialog(this);
+        dialog.show();
+        AddFriendModel model = new AddFriendModel();
+        disposable = model.findFriend()
+                .subscribe(r -> {
+                    if(r.isSuccess()) {
+                        encryptedPrefsHelper.saveString(UserProperty.PROFILE_PICTURE.getPropertyName(), r.getData().getProfile_picture());
+                        encryptedPrefsHelper.saveString(UserProperty.USERNAME.getPropertyName(), r.getData().getUser_name());
+                        encryptedPrefsHelper.saveString(UserProperty.PHONE_NUMBER.getPropertyName(), r.getData().getPhone_number());
+                        dialog.dismiss();
+                    }
+                    else {
+                        dialog.dismiss();
+                        encryptedPrefsHelper.clearProject(UserProperty.PROFILE_PICTURE.getPropertyName());
+                        encryptedPrefsHelper.clearProject(UserProperty.USERNAME.getPropertyName());
+                        encryptedPrefsHelper.clearProject(UserProperty.PHONE_NUMBER.getPropertyName());
+                        Log.d(TAG, "init: 暂无好友");
+                    }
+                }, e -> {
+                    dialog.dismiss();
+                    Log.d(TAG, "init: " + e.getMessage());
+                    Toast.makeText(this, "获取用户信息失败", Toast.LENGTH_SHORT).show();
+                });
     }
 
     @Override
@@ -136,6 +182,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
+        disposable.dispose();
+        webSocketHelper.release();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -169,7 +217,30 @@ public class MainActivity extends AppCompatActivity {
         navigation_message.setVisible(false);
     }
 
-        /**
+    private void handleCheckRefuseFragment() {
+        // 获取FragmentManager并开始事务
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+
+        // 先隐藏当前正在显示的Fragment（如果有）
+        if (currentFragment != null) {
+            fragmentTransaction.hide(currentFragment);
+        }
+
+        // 检查目标Fragment是否已添加过
+        if (checkRefuseFragment.isAdded()) {
+            // 已添加则直接显示
+            fragmentTransaction.show(checkRefuseFragment);
+        } else {
+            // 未添加则添加到容器中并显示
+            fragmentTransaction.add(R.id.fragment_container, checkRefuseFragment);
+        }
+
+        currentFragment = checkRefuseFragment; // 更新当前Fragment引用
+        fragmentTransaction.commit(); // 提交事务
+    }
+
+
+    /**
          * 处理并显示"我们的"Fragment
          * 使用add()和hide()而非replace()来保持Fragment状态
          */
@@ -230,6 +301,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static class WebSocketEventListenerImpl implements WebSocketHelper.WebSocketEventListener {
+        private EncryptedPrefsHelper encryptedPrefsHelper = EncryptedPrefsHelper.getInstance();
+        private ChatRepository chatRepository = new ChatRepository();
         @Override
         public void onOpen(WebSocket webSocket, Response response) {
 
@@ -242,16 +315,31 @@ public class MainActivity extends AppCompatActivity {
                 String messageType = jsonMessage.getString("type");
                 String payload = jsonMessage.getString("payload");  // 修复：使用getString而不是getJSONObject
 
+                Log.d(TAG, "onMessage: " + messageType);
+                Log.d(TAG, "onMessage: " + payload);
+
                 if(messageType.equals(WebSocketType.ADD_FRIEND.getType())) {
                     AddFriendMessage addFriendMessage = GsonUtil.fromJson(payload, AddFriendMessage.class);
                     addFriendMessage.setIsNew(1);
                     addFriendMessage.setHasRefuse(0);
                     addFriendRepository.insertMessage(addFriendMessage);
                 }
-                else {
+                else if(messageType.equals(WebSocketType.CHAT_MESSAGE.getType())){
+                    chatRepository.insertChat(new ChatHistory(payload, false));
+
                     // 创建一个通用事件，包含类型和数据
                     WebSocketMessageEvent event = new WebSocketMessageEvent(messageType, payload);
                     EventBus.getDefault().post(event);
+                }
+                else if(messageType.equals(WebSocketType.ACCEPT_FRIEND.getType())) {
+                    FriendRequestData data = GsonUtil.fromJson(payload, FriendRequestData.class);
+                    encryptedPrefsHelper.saveString(UserProperty.PROFILE_PICTURE.getPropertyName(), data.getProfile_picture());
+                    encryptedPrefsHelper.saveString(UserProperty.USERNAME.getPropertyName(), data.getUser_name());
+                    encryptedPrefsHelper.saveString(UserProperty.PHONE_NUMBER.getPropertyName(), data.getPhone_number());
+                }
+                else if(messageType.equals(WebSocketType.REJECT_FRIEND.getType())) {
+                    FriendRequestData data = GsonUtil.fromJson(payload, FriendRequestData.class);
+                    encryptedPrefsHelper.clearProject(data.getPhone_number());
                 }
             } catch (JSONException e) {
                 e.printStackTrace();

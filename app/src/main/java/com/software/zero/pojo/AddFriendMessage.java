@@ -9,15 +9,15 @@ public class AddFriendMessage {
     private int id;
     private String profile_picture;
     private String user_name;
-    private String phone_umber;
+    private String phone_number;
     private int isNew;
     private int hasRefuse;
 
-    public AddFriendMessage(int id, String profile_picture, String user_name, String phone_umber, int isNew, int hasRefuse) {
+    public AddFriendMessage(int id, String profile_picture, String user_name, String phone_number, int isNew, int hasRefuse) {
         this.id = id;
         this.profile_picture = profile_picture;
         this.user_name = user_name;
-        this.phone_umber = phone_umber;
+        this.phone_number = phone_number;
         this.isNew = isNew;
         this.hasRefuse = hasRefuse;
     }
@@ -38,12 +38,12 @@ public class AddFriendMessage {
         this.user_name = user_name;
     }
 
-    public String getPhone_umber() {
-        return phone_umber;
+    public String getPhone_number() {
+        return phone_number;
     }
 
-    public void setPhone_umber(String phone_umber) {
-        this.phone_umber = phone_umber;
+    public void setPhone_number(String phone_number) {
+        this.phone_number = phone_number;
     }
 
     public int getIsNew() {

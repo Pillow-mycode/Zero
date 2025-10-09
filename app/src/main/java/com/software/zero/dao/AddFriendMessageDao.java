@@ -1,6 +1,7 @@
 package com.software.zero.dao;
 
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
@@ -23,4 +24,6 @@ public interface AddFriendMessageDao {
     @Query("UPDATE add_friend_message SET isNew = 0 WHERE isNew = 1")
     void updateFriend();
 
+    @Query("DELETE FROM add_friend_message WHERE phone_number = :phoneNumber")
+    void deleteRequest(String phoneNumber);
 }

@@ -98,8 +98,14 @@ public class FindPeopleActivity extends AppCompatActivity implements FindPeopleC
     @Override
     public void onAddSuccess(FindPeopleAdapter.ViewHolder viewHolder) {
         loading.dismiss();
-        //viewHolder.button.setVisibility(GONE);todo
-        //viewHolder.requested.setVisibility(VISIBLE);
+        viewHolder.button.setVisibility(GONE);
+        viewHolder.requested.setVisibility(VISIBLE);
+    }
+
+    @Override
+    public void onAddFail() {
+        loading.dismiss();
+        Toast.makeText(this, "添加失败, 请重试", Toast.LENGTH_SHORT).show();
     }
 
     @Override

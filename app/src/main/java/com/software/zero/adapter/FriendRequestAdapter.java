@@ -16,16 +16,29 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.software.zero.R;
 import com.software.zero.pojo.AddFriendMessage;
 
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
 public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdapter.MyViewHolder> {
-    private static final String TAG = "FriendRequestAdapter";
-    private List<AddFriendMessage> friendRequestList = new ArrayList<>();
+    private List<AddFriendMessage> friendRequestList;
+    private AdapterListener listener;
 
     public FriendRequestAdapter(List<AddFriendMessage> allRequest) {
         friendRequestList = allRequest;
+    }
+
+    public List<AddFriendMessage> getFriendRequestList() {
+        return friendRequestList;
+    }
+
+    public interface AdapterListener {
+
+        void acceptFriend(String phoneNumber, int position);
+        void rejectFriend(String phoneNumber, int position);
+    }
+
+    public void setListener(AdapterListener listener) {
+        this.listener = listener;
     }
 
     @NonNull
@@ -42,16 +55,18 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
         Bitmap bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
         holder.iv_avatar.setImageBitmap(bitmap);
         holder.tv_username.setText(data.getUser_name());
+        holder.btn_accept.setOnClickListener(v -> {
+            listener.acceptFriend(friendRequestList.get(position).getPhone_number(), position);
+        });
+        holder.btn_reject.setOnClickListener(v -> {
+            listener.rejectFriend(friendRequestList.get(position).getPhone_number(), position);
+        });
     }
 
     @Override
     public int getItemCount() {
         return friendRequestList.size();
     }
-
-
-
-
     public static class MyViewHolder extends RecyclerView.ViewHolder {
         private ImageView iv_avatar;
         private TextView tv_username;

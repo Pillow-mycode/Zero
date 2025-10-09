@@ -181,6 +181,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:hint="确认密码"
+                    android:inputType="textPassword"
                     android:drawableStart="@drawable/ic_password_small"
                     android:background="@drawable/bg_edittext"
                     android:padding="12dp"

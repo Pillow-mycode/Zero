@@ -31,4 +31,7 @@ public class AddFriendRepository {
     public void updateFriend() {
         dao.updateFriend();
     }
+    public void deleteRequest(String phoneNumber) {
+        dao.deleteRequest(phoneNumber);
+    }
 }

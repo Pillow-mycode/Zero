@@ -14,7 +14,7 @@ public class TokenPrefsHelper {
     private static volatile TokenPrefsHelper instance;
     public static void init(Application context) {
         if(instance == null)
-            synchronized (EncryptedPrefsHelper.class) {
+            synchronized (TokenPrefsHelper.class) {
                 if(instance == null)
                     instance = new TokenPrefsHelper(context);
         }

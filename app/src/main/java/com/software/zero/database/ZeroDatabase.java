@@ -6,11 +6,14 @@ import androidx.room.RoomDatabase;
 
 import com.software.zero.MyApp;
 import com.software.zero.dao.AddFriendMessageDao;
+import com.software.zero.dao.ChatDao;
 import com.software.zero.pojo.AddFriendMessage;
+import com.software.zero.pojo.ChatHistory;
 
-@Database(entities = {AddFriendMessage.class}, version = 2, exportSchema = false)
+@Database(entities = {AddFriendMessage.class, ChatHistory.class}, version = 6, exportSchema = false)
 public abstract class ZeroDatabase extends RoomDatabase {
     public abstract AddFriendMessageDao addFriendMessageDao();
+    public abstract ChatDao chatDao();
 
     private static volatile ZeroDatabase INSTANCE;
 

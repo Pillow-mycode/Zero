@@ -21,5 +21,7 @@ public interface FindPeopleContract {
         void onError(Throwable e);
 
         void onAddSuccess(FindPeopleAdapter.ViewHolder viewHolder);
+
+        void onAddFail();
     }
 }

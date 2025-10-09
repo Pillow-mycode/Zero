@@ -5,6 +5,19 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_soft_gradient">
 
+    <!-- 退出登录按钮 -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_logout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="退出登录"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        app:cornerRadius="0dp"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- 左头像 -->
     <FrameLayout
         android:id="@+id/leftAvatarContainer"
@@ -50,8 +63,7 @@
         app:layout_constraintStart_toEndOf="@id/leftAvatarContainer"
         app:layout_constraintEnd_toEndOf="parent">
 
-
-    <com.google.android.material.imageview.ShapeableImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/rightAvatar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -62,4 +74,17 @@
             app:strokeWidth="2dp"
             android:elevation="4dp"/>
     </FrameLayout>
+
+    <!-- 添加在右边头像下方的文字 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="我"
+        android:textSize="16sp"
+        android:textColor="#000000"
+        app:layout_constraintTop_toBottomOf="@id/rightAvatarContainer"
+        app:layout_constraintStart_toStartOf="@id/rightAvatarContainer"
+        app:layout_constraintEnd_toEndOf="@id/rightAvatarContainer"
+        app:layout_constraintHorizontal_bias="0.5"
+        android:layout_marginTop="8dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

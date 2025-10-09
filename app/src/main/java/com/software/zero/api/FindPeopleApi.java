@@ -3,6 +3,7 @@ package com.software.zero.api;
 
 import com.software.zero.response.Response;
 import com.software.zero.response.data.FindPeopleData;
+import com.software.zero.response.data.FriendRequestData;
 
 import io.reactivex.rxjava3.core.Observable;
 import retrofit2.http.Field;
@@ -17,4 +18,6 @@ public interface FindPeopleApi {
     @POST("/add-people")
     @FormUrlEncoded
     Observable<Response<Boolean>> addPeople(@Field("phoneNumber")String phoneNumber);
+
+
 }

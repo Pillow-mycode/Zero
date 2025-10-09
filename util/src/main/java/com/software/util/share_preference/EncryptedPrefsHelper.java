@@ -66,4 +66,10 @@ public class EncryptedPrefsHelper {
     public Boolean getBoolean(String key) {
         return encryptedSharedPreferences.getBoolean(key, false);
     }
+
+    public void clearProject(String key) {
+        encryptedSharedPreferences.edit()
+                .remove(key)
+                .apply();
+    }
 }

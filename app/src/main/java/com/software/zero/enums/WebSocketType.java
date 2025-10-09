@@ -2,7 +2,9 @@ package com.software.zero.enums;
 
 public enum WebSocketType {
     CHAT_MESSAGE("chat_message"),
-    ADD_FRIEND("add_friend");
+    ADD_FRIEND("add_friend"),
+    ACCEPT_FRIEND("accept_friend"),
+    REJECT_FRIEND("reject_friend");
 
     private final String type;
 

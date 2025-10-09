@@ -53,7 +53,11 @@ public class FindPeoplePresenter implements FindPeopleContract.Presenter {
             if(r.isSuccess()) {
                 sharePrefence.saveBoolean(phoneNumber, true);
                 view.onAddSuccess(viewHolder);
+            } else {
+                view.onAddFail();
             }
+        }, e-> {
+            view.onAddFail();
         });
 
         disposable.add(subscribe);

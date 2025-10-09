@@ -5,7 +5,6 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 
 import com.software.util.retrofit.MyRetrofit;
-import com.software.util.share_preference.EncryptedPrefsHelper;
 import com.software.util.share_preference.TokenPrefsHelper;
 
 import java.io.IOException;
@@ -35,11 +34,13 @@ public class MyApp extends Application {
     }
 
     private static class TokenInterceptor implements Interceptor {
+        private static final String TAG = "MyApp";
         @NonNull
         @Override
         public Response intercept(@NonNull Chain chain) throws IOException {
             // 获取原始请求
             okhttp3.Request originalRequest = chain.request();
+
 
             // 从加密存储中获取token
             String token = tokenPrefsHelper.getAuthToken();

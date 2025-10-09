@@ -4,17 +4,15 @@ public class FriendRequestData {
     private String profile_picture;
     private String phone_number;
     private String user_name;
-    private String request_time;
-    
+
     // 无参构造函数，供Gson反序列化使用
     public FriendRequestData() {
     }
 
-    public FriendRequestData(String profile_picture, String phone_number, String user_name, String request_time) {
+    public FriendRequestData(String profile_picture, String phone_number, String user_name) {
         this.profile_picture = profile_picture;
         this.phone_number = phone_number;
         this.user_name = user_name;
-        this.request_time = request_time;
     }
 
     public String getProfile_picture() {
@@ -39,13 +37,5 @@ public class FriendRequestData {
 
     public void setUser_name(String user_name) {
         this.user_name = user_name;
-    }
-
-    public String getRequest_time() {
-        return request_time;
-    }
-
-    public void setRequest_time(String request_time) {
-        this.request_time = request_time;
     }
 }
