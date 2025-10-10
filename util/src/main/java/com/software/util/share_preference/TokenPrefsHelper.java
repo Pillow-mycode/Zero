@@ -74,4 +74,8 @@ public class TokenPrefsHelper {
     public String getString(String key) {
         return encryptedSharedPreferences.getString(key, null);
     }
+
+    public void clearProject(String s) {
+        encryptedSharedPreferences.edit().remove(s).apply();
+    }
 }

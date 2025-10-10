@@ -1,34 +1,28 @@
 package com.software.zero.database;
 
+import android.content.Context;
+
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-import com.software.zero.MyApp;
-import com.software.zero.dao.AddFriendMessageDao;
+import com.software.zero.dao.MessageDao;
 import com.software.zero.dao.ChatDao;
 import com.software.zero.pojo.AddFriendMessage;
 import com.software.zero.pojo.ChatHistory;
+import com.software.zero.pojo.PeopleMessage;
 
-@Database(entities = {AddFriendMessage.class, ChatHistory.class}, version = 5, exportSchema = false)
+@Database(entities = {AddFriendMessage.class, ChatHistory.class, PeopleMessage.class}, version = 9, exportSchema = false)
 public abstract class ZeroDatabase extends RoomDatabase {
-    public abstract AddFriendMessageDao addFriendMessageDao();
+    public abstract MessageDao addFriendMessageDao();
     public abstract ChatDao chatDao();
 
-    private static volatile ZeroDatabase INSTANCE;
-
-    public static ZeroDatabase getDatabase() {
-        if (INSTANCE == null) {
-            synchronized (ZeroDatabase.class) {
-                if (INSTANCE == null) {
-                    INSTANCE = Room.databaseBuilder(MyApp.getInstance(),
-                                    ZeroDatabase.class, "zero_database")
-                            .fallbackToDestructiveMigration() // 破坏性迁移
-                            .allowMainThreadQueries() // 仅用于测试，生产环境中应使用异步查询
-                            .build();
-                }
-            }
-        }
-        return INSTANCE;
+    // 提供一个静态方法来获取指定用户的数据库实例
+    public static ZeroDatabase getDatabase(final Context context, final String userId) {
+        return Room.databaseBuilder(context.getApplicationContext(),
+                        ZeroDatabase.class,
+                        "room_database_" + userId + ".db") // 动态命名
+                .fallbackToDestructiveMigration()
+                .build();
     }
 }

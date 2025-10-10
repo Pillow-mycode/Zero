@@ -1,9 +1,7 @@
 package com.software.zero.api;
 
-
 import com.software.zero.response.Response;
 import com.software.zero.response.data.FriendRequestData;
-
 import io.reactivex.rxjava3.core.Observable;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
@@ -17,4 +15,8 @@ public interface AddFriendApi {
 
     @GET("/find-friend")
     Observable<Response<FriendRequestData>> findFriend();
+
+    @POST("/find-peoples")
+    @FormUrlEncoded
+    Observable<Response<FriendRequestData>> findPeople(@Field("phoneNumber") String phoneNumber);
 }

@@ -17,7 +17,7 @@ import com.software.zero.contract.AddFriendContract;
 import com.software.zero.enums.UserProperty;
 import com.software.zero.pojo.AddFriendMessage;
 import com.software.zero.presenter.AddFriendPresenter;
-import com.software.zero.repository.AddFriendRepository;
+import com.software.zero.repository.MessageRepository;
 import com.software.zero.response.data.FriendRequestData;
 
 import java.util.List;
@@ -25,11 +25,13 @@ import java.util.List;
 public class FriendRequestActivity extends AppCompatActivity implements AddFriendContract.View {
     private RecyclerView rv_friend_list;
     private FriendRequestAdapter friendRequestAdapter;
-    private AddFriendRepository addFriendRepository = new AddFriendRepository();
+    private MessageRepository messageRepository = new MessageRepository();
     private LoadingDialog dialog;
     private AddFriendPresenter presenter;
     private EncryptedPrefsHelper encryptedPrefsHelper = EncryptedPrefsHelper.getInstance();
     private int nowPosition;
+    private io.reactivex.rxjava3.disposables.Disposable loadDataDisposable;
+    private io.reactivex.rxjava3.disposables.Disposable updateFriendDisposable;
     
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,36 +41,53 @@ public class FriendRequestActivity extends AppCompatActivity implements AddFrien
         presenter = new AddFriendPresenter(this);
         rv_friend_list = findViewById(R.id.rv_friend_requests);
         rv_friend_list.setLayoutManager(new LinearLayoutManager(this));
-        List<AddFriendMessage> allRequest = addFriendRepository.findAllRequest();
-        friendRequestAdapter = new FriendRequestAdapter(allRequest);
-        friendRequestAdapter.setListener(new FriendRequestAdapter.AdapterListener() {
-            @Override
-            public void acceptFriend(String phoneNumber, int position) {
-                nowPosition = position;
-                dialog.show();
-                presenter.acceptFriend(phoneNumber, "accept");
-            }
+        
+        // 异步加载数据
+        loadDataDisposable = io.reactivex.rxjava3.core.Single.fromCallable(() -> messageRepository.findAllRequest())
+                .subscribeOn(io.reactivex.rxjava3.schedulers.Schedulers.io())
+                .observeOn(io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread())
+                .subscribe(allRequest -> {
+                    friendRequestAdapter = new FriendRequestAdapter(allRequest);
+                    friendRequestAdapter.setListener(new FriendRequestAdapter.AdapterListener() {
+                        @Override
+                        public void acceptFriend(String phoneNumber, int position) {
+                            nowPosition = position;
+                            dialog.show();
+                            presenter.acceptFriend(phoneNumber, "accept");
+                        }
 
-            @Override
-            public void rejectFriend(String phoneNumber, int position) {
-                nowPosition = position;
-                dialog.show();
-                presenter.acceptFriend(phoneNumber, "reject");
-            }
-        });
-        rv_friend_list.setAdapter(friendRequestAdapter);
+                        @Override
+                        public void rejectFriend(String phoneNumber, int position) {
+                            nowPosition = position;
+                            dialog.show();
+                            presenter.acceptFriend(phoneNumber, "reject");
+                        }
+                    });
+                    rv_friend_list.setAdapter(friendRequestAdapter);
+                }, throwable -> {
+                    android.util.Log.e("FriendRequestActivity", "加载数据失败", throwable);
+                    Toast.makeText(this, "加载数据失败", Toast.LENGTH_SHORT).show();
+                });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        addFriendRepository.updateFriend();
+        updateFriendDisposable = io.reactivex.rxjava3.core.Completable.fromAction(() -> messageRepository.updateFriend())
+                .subscribeOn(io.reactivex.rxjava3.schedulers.Schedulers.io())
+                .subscribe(() -> {}, throwable -> android.util.Log.e("FriendRequestActivity", "更新好友失败", throwable));
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         friendRequestAdapter = null;
+        if (loadDataDisposable != null && !loadDataDisposable.isDisposed()) {
+            loadDataDisposable.dispose();
+        }
+        if (updateFriendDisposable != null && !updateFriendDisposable.isDisposed()) {
+            updateFriendDisposable.dispose();
+        }
     }
 
     @Override
@@ -80,7 +99,7 @@ public class FriendRequestActivity extends AppCompatActivity implements AddFrien
 
 
         List<AddFriendMessage> friendRequestList = friendRequestAdapter.getFriendRequestList();
-        addFriendRepository.deleteRequest(friendRequestList.get(nowPosition).getPhone_number());
+        messageRepository.deleteRequest(friendRequestList.get(nowPosition).getPhone_number());
 
         // 完善更新表项操作：移除列表项并通知适配器
         friendRequestList.remove(nowPosition);
@@ -99,7 +118,7 @@ public class FriendRequestActivity extends AppCompatActivity implements AddFrien
     public void onFail() {
         dialog.dismiss();
         List<AddFriendMessage> friendRequestList = friendRequestAdapter.getFriendRequestList();
-        addFriendRepository.deleteRequest(friendRequestList.get(nowPosition).getPhone_number());
+        messageRepository.deleteRequest(friendRequestList.get(nowPosition).getPhone_number());
 
         // 完善更新表项操作：移除列表项并通知适配器
         friendRequestList.remove(nowPosition);
@@ -121,7 +140,7 @@ public class FriendRequestActivity extends AppCompatActivity implements AddFrien
     @Override
     public void onRejectAccept(String phoneNumber) {
         List<AddFriendMessage> friendRequestList = friendRequestAdapter.getFriendRequestList();
-        addFriendRepository.deleteRequest(friendRequestList.get(nowPosition).getPhone_number());
+        messageRepository.deleteRequest(friendRequestList.get(nowPosition).getPhone_number());
 
         // 完善更新表项操作：移除列表项并通知适配器
         friendRequestList.remove(nowPosition);

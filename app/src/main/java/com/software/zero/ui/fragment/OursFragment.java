@@ -22,8 +22,7 @@ import com.software.util.share_preference.EncryptedPrefsHelper;
 import com.software.util.share_preference.TokenPrefsHelper;
 import com.software.zero.R;
 import com.software.zero.enums.UserProperty;
-import com.software.zero.pool.MessagePool;
-import com.software.zero.repository.AddFriendRepository;
+import com.software.zero.repository.MessageRepository;
 import com.software.zero.ui.activity.FindPeopleActivity;
 import com.software.zero.ui.activity.InterceptorActivity;
 
@@ -34,10 +33,11 @@ public class OursFragment extends Fragment {
     }
     private ShapeableImageView leftImage, rightImage;
     private EncryptedPrefsHelper sharePreference;
-    private AddFriendRepository addFriendRepository = new AddFriendRepository();
+    private MessageRepository messageRepository = new MessageRepository();
     private boolean hasTheOther = false;
     private View red_dot;
     private Button exit;
+    private io.reactivex.rxjava3.disposables.Disposable resumeDisposable;
 
     @Override
     public void onResume() {
@@ -48,11 +48,20 @@ public class OursFragment extends Fragment {
         } else {
             hasTheOther = true;
         }
-        if(addFriendRepository.checkNewMessage() && !hasTheOther) {
-            red_dot.setVisibility(VISIBLE);
-        } else {
-            red_dot.setVisibility(GONE);
-        }
+        
+        resumeDisposable = io.reactivex.rxjava3.core.Single.fromCallable(() -> messageRepository.checkNewMessage())
+                .subscribeOn(io.reactivex.rxjava3.schedulers.Schedulers.io())
+                .observeOn(io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread())
+                .subscribe(hasNewMessage -> {
+                    if(hasNewMessage && !hasTheOther) {
+                        red_dot.setVisibility(VISIBLE);
+                    } else {
+                        red_dot.setVisibility(GONE);
+                    }
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    red_dot.setVisibility(GONE);
+                });
 
         if(!hasTheOther) {
             leftImage.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.add_friend));
@@ -64,6 +73,14 @@ public class OursFragment extends Fragment {
             byte[] decode = Base64.getDecoder().decode(picture.getBytes());
             Bitmap bitmap = BitmapFactory.decodeByteArray(decode, 0, decode.length);
             leftImage.setImageBitmap(bitmap);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (resumeDisposable != null && !resumeDisposable.isDisposed()) {
+            resumeDisposable.dispose();
         }
     }
 

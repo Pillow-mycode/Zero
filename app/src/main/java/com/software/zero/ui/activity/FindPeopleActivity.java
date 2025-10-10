@@ -20,7 +20,7 @@ import com.software.zero.R;
 import com.software.zero.adapter.FindPeopleAdapter;
 import com.software.zero.contract.FindPeopleContract;
 import com.software.zero.presenter.FindPeoplePresenter;
-import com.software.zero.repository.AddFriendRepository;
+import com.software.zero.repository.MessageRepository;
 import com.software.zero.response.data.FindPeopleData;
 
 import java.util.List;
@@ -35,16 +35,33 @@ public class FindPeopleActivity extends AppCompatActivity implements FindPeopleC
     private Button bt_friend_requests;
     private LoadingDialog loading;
     private TextView tv_badge;
-    private AddFriendRepository addFriendRepository = new AddFriendRepository();
+    private MessageRepository messageRepository = new MessageRepository();
+    private io.reactivex.rxjava3.disposables.Disposable resumeDisposable;
 
 
     @Override
     protected void onResume() {
         super.onResume();
-        if(addFriendRepository.checkNewMessage()) {
-            tv_badge.setVisibility(VISIBLE);
-        } else {
-            tv_badge.setVisibility(GONE);
+        resumeDisposable = io.reactivex.rxjava3.core.Single.fromCallable(() -> messageRepository.checkNewMessage())
+                .subscribeOn(io.reactivex.rxjava3.schedulers.Schedulers.io())
+                .observeOn(io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread())
+                .subscribe(hasNewMessage -> {
+                    if (hasNewMessage) {
+                        tv_badge.setVisibility(VISIBLE);
+                    } else {
+                        tv_badge.setVisibility(GONE);
+                    }
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    tv_badge.setVisibility(GONE);
+                });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (resumeDisposable != null && !resumeDisposable.isDisposed()) {
+            resumeDisposable.dispose();
         }
     }
 

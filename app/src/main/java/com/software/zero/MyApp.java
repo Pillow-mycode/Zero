@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 
 import com.software.util.retrofit.MyRetrofit;
 import com.software.util.share_preference.TokenPrefsHelper;
+import com.software.zero.pojo.PeopleMessage;
 
 import java.io.IOException;
 
@@ -16,6 +17,23 @@ public class MyApp extends Application {
     private static MyApp instance;
     public static String url = "10.0.2.2:8080";
     private static TokenPrefsHelper tokenPrefsHelper;
+    private static PeopleMessage myMessage, theOtherMessage;
+
+    public static PeopleMessage getMyMessage() {
+        return myMessage;
+    }
+
+    public static void setMyMessage(PeopleMessage myMessage) {
+        MyApp.myMessage = myMessage;
+    }
+
+    public static PeopleMessage getTheOtherMessage() {
+        return theOtherMessage;
+    }
+
+    public static void setTheOtherMessage(PeopleMessage theOtherMessage) {
+        MyApp.theOtherMessage = theOtherMessage;
+    }
 
     @Override
     public void onCreate() {

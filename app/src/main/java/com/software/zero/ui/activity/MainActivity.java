@@ -1,6 +1,7 @@
 package com.software.zero.ui.activity;
 
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,8 +28,9 @@ import com.software.zero.enums.WebSocketType;
 import com.software.zero.model.AddFriendModel;
 import com.software.zero.pojo.AddFriendMessage;
 import com.software.zero.pojo.ChatHistory;
+import com.software.zero.pojo.PeopleMessage;
 import com.software.zero.pojo.WebSocketMessageEvent;
-import com.software.zero.repository.AddFriendRepository;
+import com.software.zero.repository.MessageRepository;
 import com.software.zero.repository.ChatRepository;
 import com.software.zero.response.data.FriendRequestData;
 import com.software.zero.ui.fragment.CheckRefuseFragment;
@@ -39,9 +41,12 @@ import com.software.zero.ui.fragment.TalkFragment;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -82,9 +87,30 @@ public class MainActivity extends AppCompatActivity {
     private BadgeDrawable navigation_message;
     private BadgeDrawable navigation_add_friend;
     private boolean badgeStatus = false;
-    private static AddFriendRepository addFriendRepository;
+    private static MessageRepository messageRepository;
     private LoadingDialog dialog;
+    private Disposable resumeDisposable;
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        resumeDisposable = io.reactivex.rxjava3.core.Single.fromCallable(() -> messageRepository.checkNewMessage())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(hasNewMessage -> navigation_add_friend.setVisible(hasNewMessage),
+                        throwable -> {
+                            Log.e(TAG, "检查新消息失败", throwable);
+                            navigation_add_friend.setVisible(false);
+                        });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (resumeDisposable != null && !resumeDisposable.isDisposed()) {
+            resumeDisposable.dispose();
+        }
+    }
 
     /**
      * Activity创建时的生命周期方法
@@ -134,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private Disposable disposable;
+    private List<Disposable> disposable = new ArrayList<>();
     public void init() {
         EventBus.getDefault().register(this);
         tokenPrefsHelper = TokenPrefsHelper.getInstance();
@@ -142,16 +168,35 @@ public class MainActivity extends AppCompatActivity {
         encryptedPrefsHelper = EncryptedPrefsHelper.getInstance();
         webSocketHelper = new WebSocketHelper("ws://" + MyApp.url + "/ws");
         webSocketHelper.connect(TokenPrefsHelper.getInstance().getAuthToken(), new WebSocketEventListenerImpl());
-        addFriendRepository = new AddFriendRepository();
+        messageRepository = new MessageRepository();
         dialog = new LoadingDialog(this);
         dialog.show();
+
         AddFriendModel model = new AddFriendModel();
-        disposable = model.findFriend()
+        Disposable subscribe1 = model.findPeople(TokenPrefsHelper.getInstance().getString("now-user"))
+                .subscribe(r -> {
+                    if(r.isSuccess()) {
+                        MyApp.setMyMessage(new PeopleMessage(r.getData().getProfile_picture(), r.getData().getPhone_number(), r.getData().getUser_name()));
+                        messageRepository.updatePeople(new PeopleMessage(r.getData().getProfile_picture(), r.getData().getPhone_number(), r.getData().getUser_name()));
+                    }
+                    else {
+                        TokenPrefsHelper.getInstance().clearAuthToken();
+                        tokenPrefsHelper.clearProject("now-user");
+                        startActivity(new Intent(MainActivity.this, InterceptorActivity.class));
+                        MainActivity.this.finish();
+                    }
+                }, e -> {
+                    Toast.makeText(this, "获取本人信息失败", Toast.LENGTH_SHORT).show();
+                });
+        disposable.add(subscribe1);
+        Disposable subscribe2 = model.findFriend()
                 .subscribe(r -> {
                     if(r.isSuccess()) {
                         encryptedPrefsHelper.saveString(UserProperty.PROFILE_PICTURE.getPropertyName(), r.getData().getProfile_picture());
                         encryptedPrefsHelper.saveString(UserProperty.USERNAME.getPropertyName(), r.getData().getUser_name());
                         encryptedPrefsHelper.saveString(UserProperty.PHONE_NUMBER.getPropertyName(), r.getData().getPhone_number());
+                        MyApp.setTheOtherMessage(new PeopleMessage(r.getData().getProfile_picture(), r.getData().getPhone_number(), r.getData().getUser_name()));
+                        messageRepository.updatePeople(new PeopleMessage(r.getData().getProfile_picture(), r.getData().getPhone_number(), r.getData().getUser_name()));
                         dialog.dismiss();
                     }
                     else {
@@ -166,23 +211,16 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "init: " + e.getMessage());
                     Toast.makeText(this, "获取用户信息失败", Toast.LENGTH_SHORT).show();
                 });
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if(addFriendRepository.checkNewMessage()) {
-            navigation_add_friend.setVisible(true);
-        } else {
-            navigation_add_friend.setVisible(false);
-        }
+        disposable.add(subscribe2);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
-        disposable.dispose();
+        for (Disposable disposable1 : disposable) {
+            disposable1.dispose();
+        }
         webSocketHelper.release();
     }
 
@@ -311,35 +349,46 @@ public class MainActivity extends AppCompatActivity {
         public void onMessage(WebSocket webSocket, String text) {
             // 解析消息，获取类型
             try {
-                JSONObject jsonMessage = new JSONObject(text);
-                String messageType = jsonMessage.getString("type");
-                String payload = jsonMessage.getString("payload");  // 修复：使用getString而不是getJSONObject
-
-                Log.d(TAG, "onMessage: " + messageType);
-                Log.d(TAG, "onMessage: " + payload);
-
-                if(messageType.equals(WebSocketType.ADD_FRIEND.getType())) {
-                    AddFriendMessage addFriendMessage = GsonUtil.fromJson(payload, AddFriendMessage.class);
-                    addFriendMessage.setIsNew(1);
-                    addFriendMessage.setHasRefuse(0);
-                    addFriendRepository.insertMessage(addFriendMessage);
-                }
-                else if(messageType.equals(WebSocketType.CHAT_MESSAGE.getType())){
-                    chatRepository.insertChat(new ChatHistory(payload, false));
-
-                    // 创建一个通用事件，包含类型和数据
-                    WebSocketMessageEvent event = new WebSocketMessageEvent(messageType, payload);
-                    EventBus.getDefault().post(event);
-                }
-                else if(messageType.equals(WebSocketType.ACCEPT_FRIEND.getType())) {
-                    FriendRequestData data = GsonUtil.fromJson(payload, FriendRequestData.class);
-                    encryptedPrefsHelper.saveString(UserProperty.PROFILE_PICTURE.getPropertyName(), data.getProfile_picture());
-                    encryptedPrefsHelper.saveString(UserProperty.USERNAME.getPropertyName(), data.getUser_name());
-                    encryptedPrefsHelper.saveString(UserProperty.PHONE_NUMBER.getPropertyName(), data.getPhone_number());
-                }
-                else if(messageType.equals(WebSocketType.REJECT_FRIEND.getType())) {
-                    FriendRequestData data = GsonUtil.fromJson(payload, FriendRequestData.class);
-                    encryptedPrefsHelper.clearProject(data.getPhone_number());
+                JSONArray array = new JSONArray(text);
+                for (int i = 0; i < array.length(); i++) {
+                    JSONObject jsonMessage = new JSONObject(array.getString(i));
+                    String messageType = jsonMessage.getString("type");
+                    String payload = jsonMessage.getString("payload");  // 修复：使用getString而不是getJSONObject
+                    if(messageType.equals(WebSocketType.ADD_FRIEND.getType())) {
+                        AddFriendMessage addFriendMessage = GsonUtil.fromJson(payload, AddFriendMessage.class);
+                        addFriendMessage.setIsNew(1);
+                        addFriendMessage.setHasRefuse(0);
+                        // 在后台线程执行数据库操作
+                        new Thread(() -> {
+                            try {
+                                messageRepository.insertMessage(addFriendMessage);
+                            } catch (Exception e) {
+                                Log.e(TAG, "插入好友请求失败", e);
+                            }
+                        }).start();
+                    }
+                    else if(messageType.equals(WebSocketType.CHAT_MESSAGE.getType())){
+                        // 在后台线程执行数据库操作
+                        new Thread(() -> {
+                            try {
+                                chatRepository.insertChat(new ChatHistory(payload, false));
+                                // 在主线程发送事件
+                                EventBus.getDefault().post(new WebSocketMessageEvent(messageType, payload));
+                            } catch (Exception e) {
+                                Log.e(TAG, "插入聊天记录失败", e);
+                            }
+                        }).start();
+                    }
+                    else if(messageType.equals(WebSocketType.ACCEPT_FRIEND.getType())) {
+                        FriendRequestData data = GsonUtil.fromJson(payload, FriendRequestData.class);
+                        encryptedPrefsHelper.saveString(UserProperty.PROFILE_PICTURE.getPropertyName(), data.getProfile_picture());
+                        encryptedPrefsHelper.saveString(UserProperty.USERNAME.getPropertyName(), data.getUser_name());
+                        encryptedPrefsHelper.saveString(UserProperty.PHONE_NUMBER.getPropertyName(), data.getPhone_number());
+                    }
+                    else if(messageType.equals(WebSocketType.REJECT_FRIEND.getType())) {
+                        FriendRequestData data = GsonUtil.fromJson(payload, FriendRequestData.class);
+                        encryptedPrefsHelper.clearProject(data.getPhone_number());
+                    }
                 }
             } catch (JSONException e) {
                 e.printStackTrace();

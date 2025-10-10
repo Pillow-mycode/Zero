@@ -7,21 +7,31 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.software.util.dialog.LoadingDialog;
+import com.software.util.share_preference.EncryptedPrefsHelper;
+import com.software.util.share_preference.TokenPrefsHelper;
+import com.software.zero.MyApp;
 import com.software.zero.R;
 import com.software.zero.adapter.ChatAdapter;
 import com.software.zero.contract.ChatContract;
+import com.software.zero.enums.UserProperty;
 import com.software.zero.pojo.ChatHistory;
+import com.software.zero.pojo.PeopleMessage;
 import com.software.zero.pojo.WebSocketMessageEvent;
 import com.software.zero.presenter.ChatPresenter;
 import com.software.zero.repository.ChatRepository;
+import com.software.zero.repository.MessageRepository;
+import com.software.zero.response.data.FriendRequestData;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -36,8 +46,13 @@ public class TalkFragment extends Fragment implements ChatContract.View {
     private RecyclerView recyclerView;
     private ChatRepository repository;
     private ChatAdapter chatAdapter; // 声明为成员变量，方便后续更新
+    private TextView tvNote;
 
     private ChatPresenter chatPresenter;
+    private LoadingDialog dialog;
+    private PeopleMessage me, other;
+
+    private MessageRepository messageRepository;
 
 
     public TalkFragment(){}
@@ -45,9 +60,27 @@ public class TalkFragment extends Fragment implements ChatContract.View {
     @Override
     public void onResume() {
         super.onResume();
-        List<ChatHistory> list = repository.selectMessage();
-        chatAdapter.loadMessage(list);
-        scrollToBottom();
+        dialog.show();
+
+        // 在后台线程执行数据库操作
+        new Thread(() -> {
+            try {
+                List<ChatHistory> list = repository.selectMessage();
+                me = MyApp.getMyMessage();
+                other = MyApp.getTheOtherMessage();
+                if(getActivity()!=null) getActivity().runOnUiThread(() -> {
+                    tvNote.setText(other.getUser_name());
+                    chatAdapter = new ChatAdapter(me, other);
+                    recyclerView.setAdapter(chatAdapter);
+                    chatAdapter.loadMessage(list);
+                    scrollToBottom();
+                    dialog.dismiss();
+                });
+            } catch (Exception e) {
+                android.util.Log.e("TalkFragment", "加载聊天记录失败", e);
+            }
+        }).start();
+
     }
 
     @Nullable
@@ -59,16 +92,15 @@ public class TalkFragment extends Fragment implements ChatContract.View {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         EventBus.getDefault().register(this);
+        dialog = new LoadingDialog(getContext());
         editText = view.findViewById(R.id.editText);
         sendButton = view.findViewById(R.id.sendButton);
         recyclerView = view.findViewById(R.id.recyclerView);
+        tvNote = view.findViewById(R.id.tvNote);
         repository = new ChatRepository();
         chatPresenter = new ChatPresenter(this);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        chatAdapter = new ChatAdapter();
-        recyclerView.setAdapter(chatAdapter);
-
+        messageRepository = new MessageRepository();
 
         sendButton.setOnClickListener(v -> {
             String message = editText.getText().toString();
@@ -77,7 +109,16 @@ public class TalkFragment extends Fragment implements ChatContract.View {
             // 添加新消息到 adapter 并刷新
             chatAdapter.addMessage(chatHistory);
             scrollToBottom();
-            repository.insertChat(chatHistory);
+            
+            // 在后台线程执行数据库操作
+            new Thread(() -> {
+                try {
+                    repository.insertChat(chatHistory);
+                } catch (Exception e) {
+                    android.util.Log.e("TalkFragment", "插入聊天记录失败", e);
+                }
+            }).start();
+            
             chatPresenter.sendMessage(message);
         });
     }

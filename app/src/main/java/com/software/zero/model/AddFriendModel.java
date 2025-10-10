@@ -23,4 +23,10 @@ public class AddFriendModel {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
+
+    public Observable<Response<FriendRequestData>> findPeople(String phoneNumber) {
+        return api.findPeople(phoneNumber)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
 }
