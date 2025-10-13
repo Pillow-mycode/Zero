@@ -1,13 +1,8 @@
-// FindPeopleAdapter.java
-
 package com.software.zero.adapter;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +14,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.software.util.address2file.Address2File;
 import com.software.util.share_preference.EncryptedPrefsHelper;
+import com.software.zero.MyApp;
 import com.software.zero.R;
 import com.software.zero.response.data.FindPeopleData;
 
@@ -75,20 +72,19 @@ public class FindPeopleAdapter extends RecyclerView.Adapter<FindPeopleAdapter.Vi
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         FindPeopleData.SearchMessage searchMessage = list.get(position);
         try {
-            byte[] decode = Base64.decode(searchMessage.getProfile_picture(), Base64.DEFAULT);
-            Bitmap bitmap = BitmapFactory.decodeByteArray(decode, 0, decode.length);
-            holder.imageView.setImageBitmap(bitmap);
+            Address2File.invoke(MyApp.getInstance(), searchMessage.getProfile_picture(), holder.imageView);
         } catch (Exception e) {
             holder.imageView.setImageResource(R.drawable.ic_boy); // 设置默认图片防止崩溃
             e.printStackTrace();
         }
+
         holder.textView.setText(searchMessage.getUser_name());
         holder.button.setOnClickListener(v -> {
             listener.addUser(list.get(position).getPhone_number(), holder);
         });
         if(encryptedPrefsHelper.getBoolean(searchMessage.getPhone_number())) {
-            //holder.button.setVisibility(GONE); todo
-            //holder.requested.setVisibility(VISIBLE);
+            holder.button.setVisibility(GONE);
+            holder.requested.setVisibility(VISIBLE);
         }
     }
 

@@ -1,7 +1,5 @@
 package com.software.zero.adapter;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,19 +9,18 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.software.util.address2file.Address2File;
+import com.software.zero.MyApp;
 import com.software.zero.R;
 import com.software.zero.pojo.ChatHistory;
 import com.software.zero.pojo.PeopleMessage;
-import com.software.zero.response.data.FriendRequestData;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private PeopleMessage leftData, rightData;
-    private Bitmap left_picture, right_picture;
-    
+
     // 定义不同的视图类型
     private static final int TYPE_LEFT = 1;
     private static final int TYPE_RIGHT = 2;
@@ -31,14 +28,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public ChatAdapter(PeopleMessage me, PeopleMessage other) {
         leftData = other;
         rightData = me;
-        String profilePicture1 = leftData.getProfile_picture();
-        byte[] decode1 = Base64.getDecoder().decode(profilePicture1);
-        left_picture = BitmapFactory.decodeByteArray(decode1, 0, decode1.length);
-
-        String profilePicture2 = rightData.getProfile_picture();
-        byte[] decode2 = Base64.getDecoder().decode(profilePicture2);
-        right_picture = BitmapFactory.decodeByteArray(decode2, 0, decode2.length);
-
     }
 
     public PeopleMessage getLeftData() {
@@ -84,11 +73,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         if (holder instanceof LeftViewHolder) {
             // 绑定左侧消息数据
             ((LeftViewHolder) holder).tvMessage.setText(chatHistory.getMessage_content());
-            ((LeftViewHolder) holder).avatar.setImageBitmap(left_picture);
+            Address2File.invoke(MyApp.getInstance(), leftData.getProfile_picture(), ((LeftViewHolder) holder).avatar);
         } else if (holder instanceof RightViewHolder) {
             // 绑定右侧消息数据
             ((RightViewHolder) holder).tvMessage.setText(chatHistory.getMessage_content());
-            ((RightViewHolder) holder).avatar.setImageBitmap(right_picture);
+            Address2File.invoke(MyApp.getInstance(), leftData.getProfile_picture(), ((RightViewHolder) holder).avatar);
         }
     }
 

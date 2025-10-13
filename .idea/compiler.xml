@@ -20,6 +20,6 @@
         <module name="Zero.annotation.main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="17" />
+    <bytecodeTargetLevel target="11" />
   </component>
 </project>

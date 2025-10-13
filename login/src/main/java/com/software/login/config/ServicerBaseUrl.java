@@ -1,7 +1,9 @@
 package com.software.login.config;
 
+import com.example.config.ServicerConfig;
+
 public class ServicerBaseUrl {
-    private static String URL = "http://10.0.2.2:8080";
+    private static String URL = "http://" + ServicerConfig.getServicerAddress() + ":8080";
 
     public static String getURL() {
         return URL;

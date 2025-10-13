@@ -1,24 +1,111 @@
 package com.software.zero.service;
 
+import android.location.Location;
+import android.util.Log;
+
 import com.amap.api.maps.AMap;
+import com.amap.api.maps.CameraUpdate;
+import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.MapView;
+import com.amap.api.maps.model.BitmapDescriptorFactory;
+import com.amap.api.maps.model.LatLng;
+import com.amap.api.maps.model.Marker;
+import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.MyLocationStyle;
+import com.software.zero.R;
 
 public class GaoDeMapService {
 
     private AMap aMap;
+    private OnLocationReceivedListener locationListener;
+    private Marker avatarMarker; // 用于保存头像标记的引用
+    private Marker girlAvatarMarker; // 用于保存女孩头像标记的引用
+    private static final String TAG = "GaoDeMapService";
+
+    // 定义位置接收监听器接口
+    public interface OnLocationReceivedListener {
+        void onLocationReceived(LatLng location);
+    }
+
+    public void setOnLocationReceivedListener(OnLocationReceivedListener listener) {
+        this.locationListener = listener;
+    }
 
     public void configMapController(MapView mapView) {
-        if(aMap == null) aMap = mapView.getMap();
+        if(aMap == null) {
+            aMap = mapView.getMap();
+            // 设置位置变化监听器
+            aMap.setOnMyLocationChangeListener(location -> {
+                if (location != null && locationListener != null) {
+                    LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                    locationListener.onLocationReceived(latLng);
+                }
+            });
+        }
     }
-    public void addBluePoint() {
+    
+    public void enableLocation() {
         MyLocationStyle myLocationStyle;
-        myLocationStyle = new MyLocationStyle();//初始化定位蓝点样式类myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE);//连续定位、且将视角移动到地图中心点，定位点依照设备方向旋转，并且会跟随设备移动。（1秒1次定位）如果不设置myLocationType，默认也会执行此种模式。
-        myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_FOLLOW) ;//连续定位、且将视角移动到地图中心点，定位蓝点跟随设备移动。（1秒1次定位）
-        myLocationStyle.interval(2000); //设置连续定位模式下的定位间隔，只在连续定位模式下生效，单次定位模式下不会生效。单位为毫秒。
-        myLocationStyle.showMyLocation(true);//设置是否显示定位小蓝点，用于满足只想使用定位，不想使用定位小蓝点的场景，设置false以后图面上不再有定位蓝点的概念，但是会持续回调位置信息。
-        aMap.setMyLocationStyle(myLocationStyle);//设置定位蓝点的Style
+        myLocationStyle = new MyLocationStyle();
+        myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_FOLLOW);
+        myLocationStyle.interval(2000); 
+        myLocationStyle.showMyLocation(false);
+        aMap.setMyLocationStyle(myLocationStyle);
         aMap.getUiSettings().setMyLocationButtonEnabled(true);
-        aMap.setMyLocationEnabled(true);// 设置为true表示启动显示定位蓝点，false表示隐藏定位蓝点并不进行定位，默认是false。
+        aMap.setMyLocationEnabled(true);
     }
+
+    public void setMapZoomTo100Meters(LatLng location) {
+        if (aMap != null) {
+            aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 16.5f));
+        }
+    }
+
+
+    // 在新位置添加头像标记并移除旧标记
+    public void updateAvatarMarker(LatLng location) {
+        if (aMap != null) {
+            // 移除旧的头像标记
+            if (avatarMarker != null) {
+                avatarMarker.remove();
+            }
+            
+            // 添加新的头像标记
+            if (location != null) {
+                avatarMarker = aMap.addMarker(new MarkerOptions()
+                        .position(location)
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_boy))
+                        .anchor(0.5f, 0.5f)); // 锚点设置在图片中心
+            }
+        }
+    }
+    
+    public void updateGirlAvatarMarker(LatLng location) {
+        if (aMap != null) {
+                try {
+                    // 强制移除所有可能存在的女孩头像标记
+                    if (girlAvatarMarker != null) {
+                        girlAvatarMarker.remove();
+                    }
+                    // 添加新的女孩头像标记
+                    if (location != null) {
+                        girlAvatarMarker = aMap.addMarker(new MarkerOptions()
+                                .position(location)
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_girl))
+                                .anchor(0.5f, 0.5f)); // 锚点设置在图片中心
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+        }
+    }
+    
+    // 移除头像标记
+    public void removeAvatarMarker() {
+        if (avatarMarker != null) {
+            avatarMarker.remove();
+            avatarMarker = null;
+        }
+    }
+
 }

@@ -11,11 +11,11 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
 public interface FindPeopleApi {
-    @POST("/find-people")
+    @POST("/zero-api/find-people")
     @FormUrlEncoded
     Observable<Response<FindPeopleData>> findPeopleList(@Field("userNameOrPhoneNumber") String text);
 
-    @POST("/add-people")
+    @POST("/zero-api/add-people")
     @FormUrlEncoded
     Observable<Response<Boolean>> addPeople(@Field("phoneNumber")String phoneNumber);
 

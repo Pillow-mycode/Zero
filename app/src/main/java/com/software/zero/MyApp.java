@@ -4,6 +4,8 @@ import android.app.Application;
 
 import androidx.annotation.NonNull;
 
+import com.example.config.ServicerConfig;
+import com.software.util.address2file.Address2File;
 import com.software.util.retrofit.MyRetrofit;
 import com.software.util.share_preference.TokenPrefsHelper;
 import com.software.zero.pojo.PeopleMessage;
@@ -15,7 +17,7 @@ import okhttp3.Response;
 
 public class MyApp extends Application {
     private static MyApp instance;
-    public static String url = "10.0.2.2:8080";
+    public static String url = ServicerConfig.getServicerAddress() + ":8080";
     private static TokenPrefsHelper tokenPrefsHelper;
     private static PeopleMessage myMessage, theOtherMessage;
 
@@ -44,6 +46,12 @@ public class MyApp extends Application {
         MyRetrofit.init(new MyRetrofit.Builder()
                 .setBaseUrl("http://" + url)
                 .addInterceptor(new TokenInterceptor())
+        );
+
+        Address2File.init(new Address2File.Builder()
+                .setNetwork("http")
+                .setBaseUrl(url)
+                .setUrl("/uploads")
         );
     }
 

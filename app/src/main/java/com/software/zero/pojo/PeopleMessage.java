@@ -1,7 +1,5 @@
 package com.software.zero.pojo;
 
-import android.graphics.Bitmap;
-
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
@@ -22,7 +20,7 @@ public class PeopleMessage {
         this.phone_number = phone_number;
         this.user_name = user_name;
     }
-
+    
     public int getId() {
         return id;
     }

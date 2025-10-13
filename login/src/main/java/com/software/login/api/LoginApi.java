@@ -10,11 +10,11 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
 public interface LoginApi {
-    @POST("/login")
+    @POST("/zero-api/login")
     @FormUrlEncoded
     Observable<Response<LoginResponse>> login(@Field("phoneNumber") String username,@Field("password") String password);
 
-    @POST("/register")
+    @POST("/zero-api/register")
     @FormUrlEncoded
     Observable<Response<LoginResponse>> register(@Field("phoneNumber") String username,@Field("password") String password,
                                                  @Field("confirmPassword") String confirmPassword);

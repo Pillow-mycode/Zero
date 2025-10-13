@@ -9,7 +9,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
 public interface ChatApi {
-    @POST("/send-message")
+    @POST("/zero-api/send-message")
     @FormUrlEncoded
     Observable<Response<ChatData>> sendMessage(@Field("message") String message);
 }

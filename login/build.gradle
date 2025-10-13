@@ -32,6 +32,8 @@ dependencies {
     androidTestImplementation libs.espresso.core
 
     implementation(project(":util"))
+    implementation(project(":config"))
+
 
     // RxJava 3 核心库
     implementation 'io.reactivex.rxjava3:rxjava:3.1.8'

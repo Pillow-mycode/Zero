@@ -205,7 +205,7 @@ public class LoginActivity extends AppCompatActivity implements LoginContact.Log
         TokenPrefsHelper.getInstance().saveString("now-user", etLoginUsername.getText().toString());
         setResult(RESULT_OK, intent);
         loadingDialog.dismiss();
-        Toast.makeText(this, "登录成功", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "登录成功", Toast.LENGTH_SHORT).show(); todo
         finish();
     }
 

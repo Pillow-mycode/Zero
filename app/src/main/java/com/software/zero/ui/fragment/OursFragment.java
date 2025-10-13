@@ -18,15 +18,16 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.imageview.ShapeableImageView;
+import com.software.util.address2file.Address2File;
 import com.software.util.share_preference.EncryptedPrefsHelper;
 import com.software.util.share_preference.TokenPrefsHelper;
+import com.software.zero.MyApp;
 import com.software.zero.R;
 import com.software.zero.enums.UserProperty;
 import com.software.zero.repository.MessageRepository;
 import com.software.zero.ui.activity.FindPeopleActivity;
 import com.software.zero.ui.activity.InterceptorActivity;
 
-import java.util.Base64;
 
 public class OursFragment extends Fragment {
     public OursFragment() {
@@ -70,9 +71,7 @@ public class OursFragment extends Fragment {
             });
         } else {
             String picture = sharePreference.getString(UserProperty.PROFILE_PICTURE.getPropertyName());
-            byte[] decode = Base64.getDecoder().decode(picture.getBytes());
-            Bitmap bitmap = BitmapFactory.decodeByteArray(decode, 0, decode.length);
-            leftImage.setImageBitmap(bitmap);
+            Address2File.invoke(MyApp.getInstance(), picture, leftImage);
         }
     }
 

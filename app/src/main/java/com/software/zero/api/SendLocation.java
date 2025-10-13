@@ -8,8 +8,9 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
-public interface InterceptorApi {
-    @POST("/zero-api/token-check")
+public interface SendLocation {
+
+    @POST("/zero-api/location")
     @FormUrlEncoded
-    Observable<Response<InterceptorData>> checkTokenEffect(@Field("token") String authToken);
+    Observable<Response<InterceptorData>> sendLocation(@Field("latitude") double latitude , @Field("longitude") double longitude);
 }

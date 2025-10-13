@@ -13,10 +13,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.software.util.address2file.Address2File;
+import com.software.zero.MyApp;
 import com.software.zero.R;
 import com.software.zero.pojo.AddFriendMessage;
 
-import java.util.Base64;
 import java.util.List;
 
 public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdapter.MyViewHolder> {
@@ -51,9 +52,7 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
     @Override
     public void onBindViewHolder(@NonNull FriendRequestAdapter.MyViewHolder holder, int position) {
         AddFriendMessage data = friendRequestList.get(position);
-        byte[] decodedString = Base64.getDecoder().decode(data.getProfile_picture());
-        Bitmap bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-        holder.iv_avatar.setImageBitmap(bitmap);
+        Address2File.invoke(MyApp.getInstance(), data.getProfile_picture(), holder.iv_avatar);
         holder.tv_username.setText(data.getUser_name());
         holder.btn_accept.setOnClickListener(v -> {
             listener.acceptFriend(friendRequestList.get(position).getPhone_number(), position);

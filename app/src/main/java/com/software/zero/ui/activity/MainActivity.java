@@ -17,6 +17,7 @@ import com.amap.api.maps.MapView;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.software.util.GsonUtil;
+import com.software.util.address2file.Address2File;
 import com.software.util.dialog.LoadingDialog;
 import com.software.util.share_preference.EncryptedPrefsHelper;
 import com.software.util.share_preference.TokenPrefsHelper;
@@ -33,6 +34,7 @@ import com.software.zero.pojo.WebSocketMessageEvent;
 import com.software.zero.repository.MessageRepository;
 import com.software.zero.repository.ChatRepository;
 import com.software.zero.response.data.FriendRequestData;
+import com.software.zero.response.data.LocationData;
 import com.software.zero.ui.fragment.CheckRefuseFragment;
 import com.software.zero.ui.fragment.MainFragment;
 import com.software.zero.ui.fragment.OursFragment;
@@ -67,9 +69,6 @@ public class MainActivity extends AppCompatActivity {
 
     // 日志标签
     private static final String TAG = "MainActivity";
-
-    // 高德地图视图
-    private MapView mMapView;
 
     // 当前显示的Fragment实例
     private Fragment currentFragment = null;
@@ -120,11 +119,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        handleMainFragment();
         init();
         // 设置内容视图为底部导航布局
         setContentView(R.layout.activity_bottom_navigation_view);
-
-        handleMainFragment();
         // 初始化底部导航栏并设置项目选择监听器
         navigationView = findViewById(R.id.bottom_navigation);
         navigation_add_friend = navigationView.getOrCreateBadge(R.id.navigation_ours);
@@ -176,7 +174,9 @@ public class MainActivity extends AppCompatActivity {
         Disposable subscribe1 = model.findPeople(TokenPrefsHelper.getInstance().getString("now-user"))
                 .subscribe(r -> {
                     if(r.isSuccess()) {
-                        MyApp.setMyMessage(new PeopleMessage(r.getData().getProfile_picture(), r.getData().getPhone_number(), r.getData().getUser_name()));
+                        PeopleMessage peopleMessage = new PeopleMessage(r.getData().getProfile_picture(), r.getData().getPhone_number(), r.getData().getUser_name());
+                        MyApp.setMyMessage(peopleMessage);
+
                         messageRepository.updatePeople(new PeopleMessage(r.getData().getProfile_picture(), r.getData().getPhone_number(), r.getData().getUser_name()));
                     }
                     else {
@@ -192,10 +192,12 @@ public class MainActivity extends AppCompatActivity {
         Disposable subscribe2 = model.findFriend()
                 .subscribe(r -> {
                     if(r.isSuccess()) {
+                        Address2File.preloadImage(this, r.getData().getProfile_picture());
                         encryptedPrefsHelper.saveString(UserProperty.PROFILE_PICTURE.getPropertyName(), r.getData().getProfile_picture());
                         encryptedPrefsHelper.saveString(UserProperty.USERNAME.getPropertyName(), r.getData().getUser_name());
                         encryptedPrefsHelper.saveString(UserProperty.PHONE_NUMBER.getPropertyName(), r.getData().getPhone_number());
-                        MyApp.setTheOtherMessage(new PeopleMessage(r.getData().getProfile_picture(), r.getData().getPhone_number(), r.getData().getUser_name()));
+                        PeopleMessage peopleMessage = new PeopleMessage(r.getData().getProfile_picture(), r.getData().getPhone_number(), r.getData().getUser_name());
+                        MyApp.setTheOtherMessage(peopleMessage);
                         messageRepository.updatePeople(new PeopleMessage(r.getData().getProfile_picture(), r.getData().getPhone_number(), r.getData().getUser_name()));
                         dialog.dismiss();
                     }
@@ -354,6 +356,10 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject jsonMessage = new JSONObject(array.getString(i));
                     String messageType = jsonMessage.getString("type");
                     String payload = jsonMessage.getString("payload");  // 修复：使用getString而不是getJSONObject
+                    if(messageType.equals(WebSocketType.LOCATION.getType())) {
+                        Log.d("go", "onMessage: ===========================");
+                        EventBus.getDefault().postSticky(new WebSocketMessageEvent(messageType, payload));
+                    }
                     if(messageType.equals(WebSocketType.ADD_FRIEND.getType())) {
                         AddFriendMessage addFriendMessage = GsonUtil.fromJson(payload, AddFriendMessage.class);
                         addFriendMessage.setIsNew(1);
@@ -381,6 +387,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     else if(messageType.equals(WebSocketType.ACCEPT_FRIEND.getType())) {
                         FriendRequestData data = GsonUtil.fromJson(payload, FriendRequestData.class);
+                        Address2File.preloadImage(MyApp.getInstance(), data.getProfile_picture());
                         encryptedPrefsHelper.saveString(UserProperty.PROFILE_PICTURE.getPropertyName(), data.getProfile_picture());
                         encryptedPrefsHelper.saveString(UserProperty.USERNAME.getPropertyName(), data.getUser_name());
                         encryptedPrefsHelper.saveString(UserProperty.PHONE_NUMBER.getPropertyName(), data.getPhone_number());

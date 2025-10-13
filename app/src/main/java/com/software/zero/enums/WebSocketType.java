@@ -4,7 +4,8 @@ public enum WebSocketType {
     CHAT_MESSAGE("chat_message"),
     ADD_FRIEND("add_friend"),
     ACCEPT_FRIEND("accept_friend"),
-    REJECT_FRIEND("reject_friend");
+    REJECT_FRIEND("reject_friend"),
+    LOCATION("location");
 
     private final String type;
 

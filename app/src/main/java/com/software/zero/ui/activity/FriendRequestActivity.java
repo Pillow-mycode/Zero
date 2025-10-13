@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.software.util.address2file.Address2File;
 import com.software.util.dialog.LoadingDialog;
 import com.software.util.share_preference.EncryptedPrefsHelper;
 import com.software.zero.R;
@@ -93,6 +94,7 @@ public class FriendRequestActivity extends AppCompatActivity implements AddFrien
     @Override
     public void onAccept(FriendRequestData friendMessage) {
         dialog.dismiss();
+        Address2File.preloadImage(this, friendMessage.getProfile_picture());
         encryptedPrefsHelper.saveString(UserProperty.PROFILE_PICTURE.getPropertyName(), friendMessage.getProfile_picture());
         encryptedPrefsHelper.saveString(UserProperty.USERNAME.getPropertyName(), friendMessage.getUser_name());
         encryptedPrefsHelper.saveString(UserProperty.PHONE_NUMBER.getPropertyName(), friendMessage.getPhone_number());
