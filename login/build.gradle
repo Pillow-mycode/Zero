@@ -33,6 +33,7 @@ dependencies {
 
     implementation(project(":util"))
     implementation(project(":config"))
+    implementation(project(":router"))
 
 
     // RxJava 3 核心库

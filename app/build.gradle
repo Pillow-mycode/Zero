@@ -60,6 +60,7 @@ dependencies {
 
     implementation(project(":login"))
     implementation(project(":util"))
+    implementation(project(":router"))
     implementation(project(":config"))
 
 

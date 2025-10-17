@@ -1,7 +1,7 @@
 package com.example.config;
 
 public class ServicerConfig {
-    private static String ServicerAddress = "192.168.70.86";
+    private static String ServicerAddress = "10.0.2.2";
 
     public static String getServicerAddress() {
         return ServicerAddress;

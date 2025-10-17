@@ -5,12 +5,15 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 
 import com.example.config.ServicerConfig;
+import com.software.router.IRouter;
 import com.software.util.address2file.Address2File;
 import com.software.util.retrofit.MyRetrofit;
 import com.software.util.share_preference.TokenPrefsHelper;
 import com.software.zero.pojo.PeopleMessage;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.Interceptor;
 import okhttp3.Response;
@@ -53,6 +56,20 @@ public class MyApp extends Application {
                 .setBaseUrl(url)
                 .setUrl("/uploads")
         );
+
+        List<String> list = List.of(
+                "com.software.login.LoginInitialer"
+        );
+
+        for (String s : list) {
+            try {
+                Class<?> aClass = Class.forName(s);
+                IRouter iRouter = (IRouter) aClass.newInstance();
+                iRouter.register();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     public static MyApp getInstance() {

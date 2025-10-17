@@ -95,7 +95,6 @@ public class FindPeopleActivity extends AppCompatActivity implements FindPeopleC
         bt_friend_requests.setOnClickListener(v -> {
             startActivity(new Intent(this, FriendRequestActivity.class));
             tv_badge.setVisibility(GONE);
-
         });
     }
 

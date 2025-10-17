@@ -49,7 +49,10 @@ public class LoginActivity extends AppCompatActivity implements LoginContact.Log
         setContentView(R.layout.activity_login);
         initLayout();
 
-        tab_login.setOnClickListener(v -> switchToLogin());
+        tab_login.setOnClickListener(v ->
+        {
+            switchToLogin();
+        });
         tab_register.setOnClickListener(v -> switchToRegister());
 
         // 设置带防抖功能的登录和注册按钮点击事件
@@ -229,6 +232,7 @@ public class LoginActivity extends AppCompatActivity implements LoginContact.Log
 
     @Override
     public void onPasswordNotMatch() {
+        loadingDialog.dismiss();
         Toast.makeText(this, "密码不一致", Toast.LENGTH_SHORT).show();
     }
 

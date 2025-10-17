@@ -19,9 +19,9 @@ public class MyScrollView extends ScrollView {
     private float firstMoveLocationX;
     private float firstMoveLocationY;
     private boolean flag = true;
+    private boolean change = false;
 
     private float moveDistanceY;
-    Animation animation;
 
     public MyScrollView(Context context) {
         super(context);
@@ -37,6 +37,9 @@ public class MyScrollView extends ScrollView {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        if(getScrollY() != 0) {
+            return super.onTouchEvent(ev);
+        }
         if(ev.getAction() == MotionEvent.ACTION_DOWN) {
             startX = ev.getX();
             startY = ev.getY();
@@ -49,12 +52,10 @@ public class MyScrollView extends ScrollView {
                 handleMoveEvent(moveDistanceY);
                 flag = false;
             }
-
+            if(change) return super.onTouchEvent(ev);
         } else if(ev.getAction() == MotionEvent.ACTION_UP) {
-
+            change = false;
         }
-
-        Log.d(TAG, "onTouchEvent: " + moveDistanceY);
         return true;
     }
 
@@ -76,9 +77,13 @@ public class MyScrollView extends ScrollView {
             } else if(location == ScrollViewLocation.MIDDLE) {
                 last = 1500;
                 location = ScrollViewLocation.TOP;
+            } else {
+                if(getScrollY() == 0) {
+                    change = true;
+                    return ;
+                }
             }
         }
-        Log.d(TAG, "handleMoveEvent: " + last);
         if(last != 0) changeLayoutHeight(height, last);
     }
 

@@ -1,6 +1,8 @@
 package com.software.zero.presenter;
 
 
+import android.util.Log;
+
 import com.software.util.share_preference.EncryptedPrefsHelper;
 import com.software.zero.adapter.FindPeopleAdapter;
 import com.software.zero.ui.activity.FindPeopleActivity;
@@ -57,6 +59,7 @@ public class FindPeoplePresenter implements FindPeopleContract.Presenter {
                 view.onAddFail();
             }
         }, e-> {
+            e.printStackTrace();
             view.onAddFail();
         });
 
